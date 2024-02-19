@@ -1,5 +1,5 @@
 ---
-- name: Generate Dockerfiles
+- name: "Generate Dockerfiles and build container images"
   hosts: "{{ target | default('all') }}"
   gather_facts: true
   vars:
