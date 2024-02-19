@@ -1,0 +1,26 @@
+FROM {{ dockerfile.from }}:{{ build_tags[0] }}
+
+# Set maintainer
+LABEL maintainer="{{ build_maintainer }}"
+MAINTAINER {{ build_maintainer }}
+
+# Set environment variables
+{% for env_var, value in dockerfile.environment.items() %}
+ENV {{ env_var }}={{ value }}
+{% endfor %}
+ENV timestamp={{ ansible_date_time.iso8601 }}
+
+# Install dependencies and run commands
+RUN {{ dockerfile.package_update }} && \
+    {{ dockerfile.package_install }} {{ dockerfile.packages | join(' ') }} && \
+    {{ dockerfile.package_clean }}; \
+{% for command in dockerfile.commands %}
+{% if loop.last %}
+    {{ command }}
+{% else %}
+    {{ command }}; \
+{% endif %}
+{% endfor %}
+
+# Set entrypoint
+ENTRYPOINT ["{{ dockerfile.entrypoint }}"]

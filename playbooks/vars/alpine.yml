@@ -1,0 +1,28 @@
+---
+# name: ansible-molecule-images
+# file: playbooks/vars/alpine.yml
+
+dockerfile:
+  from: "{{ container_registry }}/{{ container_image }}"
+  entrypoint: "/sbin/init"
+  environment:
+    container: docker
+  package_update: "apk upgrade --no-cache"
+  package_install: "apk add --no-cache"
+  packages:
+    - bash
+    - openrc
+    - procps
+    - python3
+    - sudo
+  package_clean: "apk cache clean"
+  commands:
+    - mkdir -p /etc/network/
+    - sh -c 'echo -e "auto lo\niface lo inet loopback" | tee /etc/network/interfaces'
+    - sed -ie '$arc_provide="loopback net"' /etc/rc.conf
+    - rm -rf "/tmp/"*
+    - sed -i -e 's/#rc_sys=""/rc_sys="lxc"/g' -e 's/^#\(rc_logger="YES"\)$/\1/' /etc/rc.conf
+    - sed -i '/tty/d' /etc/inittab
+    - sed -i 's/hostname $opts/# hostname $opts/g' /etc/init.d/hostname
+    - sed -i 's/mount -t tmpfs/# mount -t tmpfs/g' /lib/rc/sh/init.sh
+    - sed -i -e 's/^\(Defaults\s*requiretty\)/#--- \1/' /etc/sudoers

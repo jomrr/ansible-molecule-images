@@ -1,0 +1,166 @@
+---
+# name: ansible-molecule-images
+# file: containers.yml
+
+all:
+  vars:
+    ansible_connection: local
+    build_maintainer: "Jonas Mauer <jam@kabelmail.net>"
+    container_registry: docker.io
+    push_registries:
+      - name: docker.io
+        username: "{{ lookup('ansible.builtin.env', 'DOCKER_USER') }}"
+        password: "{{ lookup('ansible.builtin.env', 'DOCKER_SECRET') }}"
+  children:
+    almalinux:
+      hosts:
+        almalinux-9:
+          build_tags:
+            - 9
+            - latest
+        almalinux-8:
+          build_tags:
+            - 8
+      vars:
+        build_image: almalinux
+        container_image: almalinux
+    alpine:
+      hosts:
+        alpine-3.19:
+          build_tags:
+            - 3.19
+            - latest
+        alpine-3.18:
+          build_tags:
+            - 3.18
+        alpine-3.17:
+          build_tags:
+            - 3.17
+      vars:
+        build_image: alpine
+        container_image: alpine
+    amazonlinux:
+      hosts:
+        amazonlinux-2023:
+          build_tags:
+            - 2023
+            - latest
+        amazonlinux-2:
+          build_tags:
+            - 2
+      vars:
+        build_image: amazonlinux
+        container_image: amazonlinux
+    archlinux:
+      hosts:
+        archlinux-latest:
+          build_tags:
+            - latest
+      vars:
+        build_image: archlinux
+        container_image: archlinux
+    debian:
+      hosts:
+        debian-12:
+          build_tags:
+            - 12
+            - bookworm
+            - latest
+            - stable
+        debian-11:
+          build_tags:
+            - 11
+            - bullseye
+            - oldstable
+        debian-buster:
+          build_tags:
+            - 10
+            - buster
+            - oldoldstable
+        debian-sid:
+          build_tags:
+            - sid
+            - unstable
+        debian-testing:
+          build_tags:
+            - testing
+      vars:
+        build_image: debian
+        container_image: debian
+    fedora:
+      hosts:
+        fedora-40:
+          build_tags:
+            - 40
+        fedora-39:
+          build_tags:
+            - 39
+            - latest
+        fedora-38:
+          build_tags:
+            - 38
+        fedora-rawhide:
+          build_tags:
+            - rawhide
+      vars:
+        build_image: fedora
+        container_image: fedora
+    opensuse:
+      hosts:
+        opensuse-15.5:
+          build_image: opensuse
+          build_tags:
+            - 15.5
+            - 15
+            - latest
+        opensuse-15.4:
+          build_image: opensuse
+          build_tags:
+            - 15.4
+        opensuse-leap-15.5:
+          build_image: opensuse-leap
+          build_tags:
+            - 15.5
+            - 15
+            - latest
+        opensuse-leap-15.4:
+          build_image: opensuse-leap
+          build_tags:
+            - 15.4
+        opensuse-tumbleweed:
+          build_image: opensuse-tumbleweed
+          build_tags:
+            - latest
+          container_image: opensuse/tumbleweed
+      vars:
+        container_image: opensuse/leap
+    oraclelinux:
+      hosts:
+        oraclelinux-9:
+          build_tags:
+            - 9
+            - latest
+        oraclelinux-8:
+          build_tags:
+            - 8
+      vars:
+        build_image: oraclelinux
+        container_image: oraclelinux
+    ubuntu:
+      hosts:
+        ubuntu-22.04:
+          build_tags:
+            - 22.04
+            - jammy
+            - latest
+        ubuntu-20.04:
+          build_tags:
+            - 20.04
+            - focal
+        ubuntu-18.04:
+          build_tags:
+            - 18.04
+            - bionic
+      vars:
+        build_image: ubuntu
+        container_image: ubuntu

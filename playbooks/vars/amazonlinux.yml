@@ -1,0 +1,34 @@
+---
+# name: ansible-molecule-images
+# file: playbooks/vars/amazonlinux.yml
+
+dockerfile:
+  from: "{{ container_registry }}/{{ container_image }}"
+  entrypoint: "/usr/lib/systemd/systemd"
+  environment:
+    container: docker
+  package_update: "yum -qy update --refresh && yum -y install rpm dnf-plugins-core"
+  package_install: "yum -qy --nodocs --setopt=tsflags=nodocs install"
+  packages:
+    - bash
+    - findutils
+    - hostname
+    - initscripts
+    - iproute
+    - passwd
+    - procps-ng
+    - python3
+    - sudo
+    - systemd
+  package_clean: "yum -qy autoremove && yum -qy clean all"
+  commands:
+    - find /etc/systemd/system /lib/systemd/system -path 'sysinit.target.wants/*' -not -name '*systemd-tmpfiles*' -delete
+    - rm -f /lib/systemd/system/multi-user.target.wants/*
+    - rm -f /etc/systemd/system/*.wants/*
+    - rm -f /lib/systemd/system/local-fs.target.wants/*
+    - rm -f /lib/systemd/system/sockets.target.wants/*udev*
+    - rm -f /lib/systemd/system/sockets.target.wants/*initctl*
+    - rm -f /lib/systemd/system/basic.target.wants/*
+    - rm -f /lib/systemd/system/anaconda.target.wants/*
+    - systemctl mask getty.service
+    - sed -i -e 's/^\\(Defaults\\s*requiretty\\)/#--- \\1/' /etc/sudoers

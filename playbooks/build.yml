@@ -1,0 +1,63 @@
+---
+- name: Generate Dockerfiles
+  hosts: "{{ target | default('all') }}"
+  gather_facts: true
+  strategy: free
+  vars:
+    build_dir: "../build"
+  tasks:
+    - name: "Import variable files"
+      ansible.builtin.include_vars:
+        file: "{{ item }}"
+      with_first_found:
+        - files:
+          - "vars/{{ inventory_hostname }}.yml"
+          - "vars/{{ group_names[0] }}.yml"
+          - "vars/default.yml"
+  
+    - name: "Create build directory"
+      file:
+        path: "{{ build_dir }}/{{ inventory_hostname }}"
+        state: directory
+        mode: '0755'
+
+    - name: "Generate Dockerfile"
+      template:
+        src: Dockerfile.j2
+        dest: "{{ build_dir }}/{{ inventory_hostname }}/Dockerfile"
+
+
+    - name: "Generate image list"
+      ansible.builtin.set_fact:
+        _images: >-
+          {{ 
+              _images |
+              default([]) + [
+                { 'tag': item } | 
+                combine({ 'image': 'molecule-' + build_image })
+              ]
+          }}
+      loop: "{{ build_tags }}"
+
+    - name: "Generate image list per registry"
+      no_log: true
+      ansible.builtin.set_fact:
+        _registry_images: "{{ _registry_images | default([]) + [item | combine] }}"
+      loop: "{{ push_registries | product(_images) }}"
+
+    - name: "Build container images"
+      no_log: true
+      containers.podman.podman_image:
+        name: "{{ item.name }}/{{ item.username }}/{{ item.image }}"
+        build:
+          file: "{{ build_dir }}/{{ inventory_hostname }}/Dockerfile"
+          force_rm: true
+          format: docker
+        force: true
+        path: "{{ build_dir }}/{{ inventory_hostname }}"
+        state: build
+        tag: "{{ item.tag }}"
+        push: true
+        username: "{{ item.username }}"
+        password: "{{ item.password }}"
+      loop: "{{ _registry_images }}"

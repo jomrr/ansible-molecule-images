@@ -1,0 +1,14 @@
+# Release artifacts ------------------------------------------------------------
+build/
+dist/
+# Dependencies -----------------------------------------------------------------
+collections/
+roles/
+requirements.txt
+requirements.yml
+# IDE files and directories ----------------------------------------------------
+.idea/
+.vscode/
+# Python files and directories -------------------------------------------------
+.venv/
+__pycache__/
