@@ -2,7 +2,6 @@
 - name: Generate Dockerfiles
   hosts: "{{ target | default('all') }}"
   gather_facts: true
-  strategy: free
   vars:
     build_dir: "../build"
   tasks:
@@ -11,29 +10,29 @@
         file: "{{ item }}"
       with_first_found:
         - files:
-          - "vars/{{ inventory_hostname }}.yml"
-          - "vars/{{ group_names[0] }}.yml"
-          - "vars/default.yml"
-  
+            - "vars/{{ inventory_hostname }}.yml"
+            - "vars/{{ group_names[0] }}.yml"
+            - "vars/default.yml"
+
     - name: "Create build directory"
-      file:
+      ansible.builtin.file:
         path: "{{ build_dir }}/{{ inventory_hostname }}"
         state: directory
         mode: '0755'
 
     - name: "Generate Dockerfile"
-      template:
+      ansible.builtin.template:
         src: Dockerfile.j2
         dest: "{{ build_dir }}/{{ inventory_hostname }}/Dockerfile"
-
+        mode: '0644'
 
     - name: "Generate image list"
       ansible.builtin.set_fact:
         _images: >-
-          {{ 
+          {{
               _images |
               default([]) + [
-                { 'tag': item } | 
+                { 'tag': item } |
                 combine({ 'image': 'molecule-' + build_image })
               ]
           }}
