@@ -13,7 +13,6 @@ version_provider = "pep621"
 tag_format = "v$version"
 
 [tool.semantic_release]
-build_command = "mkdir -p dist/ && tar -czf dist/ansible-molecule-images-{version}.tar.gz playbooks/ ansible.cfg containers.yml Makefile README.md"
 commit_message = "build(release): {version}"
 major_on_zero = true
 upload_to_pypi = false
