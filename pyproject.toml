@@ -13,7 +13,7 @@ version_provider = "pep621"
 tag_format = "v$version"
 
 [tool.semantic_release]
-commit_message = "build(release): {version}"
+commit_message = "build(release): version {version}"
 major_on_zero = true
 upload_to_pypi = false
 upload_to_vcs_release = true

@@ -127,6 +127,8 @@ prepare-release:
 version:
 	@git checkout main
 	@semantic-release version
+	@git checkout dev
+	@git merge main
 
 # create a new Git tag and build the distribution files
 publish:
