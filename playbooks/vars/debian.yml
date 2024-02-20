@@ -4,7 +4,7 @@
 
 dockerfile:
   from: "{{ container_registry }}/{{ container_image }}"
-  entrypoint: "/usr/lib/systemd/systemd"
+  entrypoint: "/lib/systemd/systemd"
   environment:
     container: docker
     LC_ALL: C
