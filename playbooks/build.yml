@@ -42,7 +42,7 @@
         _registry_images: "{{ _registry_images | default([]) + [item | combine] }}"
       loop: "{{ push_registries | product(_images) }}"
 
-    - name: "Build container images"
+    - name: "Build container images and push to registry"
       no_log: true
       containers.podman.podman_image:
         name: "{{ item.name }}/{{ item.username }}/{{ item.image }}"
