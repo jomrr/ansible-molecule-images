@@ -15,7 +15,10 @@ dockerfile:
     - procps-ng
     - python3
     - sudo
-  package_clean: "pacman -Sc"
+  # "pacman -Scc --noconfirm" =~ apt clean (clean all cache)
+  # "pacman -Sc --noconfirm" =~ apt autoclean (clean out of date cache)
+  # "pacman -Rns $(pacman -Qtdq) --noconfirm" =~ apt autoremove (remove unused packages)
+  package_clean: "pacman -Rns $(pacman -Qtdq) --noconfirm"
   commands:
     - find /etc/systemd/system /lib/systemd/system -path 'sysinit.target.wants/*' -not -name '*systemd-tmpfiles*' -delete
     - rm -f /lib/systemd/system/multi-user.target.wants/*
