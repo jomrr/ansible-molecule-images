@@ -61,21 +61,25 @@ all:
         container_image: archlinux
     debian:
       hosts:
+        debian-13:
+          build_tags:
+            - trixie
+            - 13
         debian-12:
           build_tags:
-            - 12
             - bookworm
+            - 12
             - latest
             - stable
         debian-11:
           build_tags:
-            - 11
             - bullseye
+            - 11
             - oldstable
-        debian-buster:
+        debian-10:
           build_tags:
-            - 10
             - buster
+            - 10
             - oldoldstable
         debian-sid:
           build_tags:
@@ -101,6 +105,7 @@ all:
             - 38
         fedora-rawhide:
           build_tags:
+            - 41
             - rawhide
       vars:
         build_image: fedora
@@ -151,6 +156,7 @@ all:
         ubuntu-24.04:
           build_tags:
             - 24.04
+            - devel
             - noble
         ubuntu-22.04:
           build_tags:
@@ -161,10 +167,6 @@ all:
           build_tags:
             - 20.04
             - focal
-        ubuntu-18.04:
-          build_tags:
-            - 18.04
-            - bionic
       vars:
         build_image: ubuntu
         container_image: ubuntu
