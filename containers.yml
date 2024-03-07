@@ -148,6 +148,10 @@ all:
         container_image: oraclelinux
     ubuntu:
       hosts:
+        ubuntu-24.04:
+          build_tags:
+            - 24.04
+            - noble
         ubuntu-22.04:
           build_tags:
             - 22.04
