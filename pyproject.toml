@@ -5,7 +5,7 @@ description = "Ansible playbook to build and push container images with init sys
 authors = ["Jonas Mauer"]
 license = "MIT"
 keywords = ["ansible", "docker", "podman", "molecule", "images"]
-repository = "https://github.com/jam82/ansible-molecule-images"
+repository = "https://github.com/jomrr/ansible-molecule-images"
 
 [tool.commitizen]
 name = "cz_conventional_commits"
