@@ -1,11 +1,11 @@
 # ansible-molecule-images
 
-![GitHub](https://img.shields.io/github/license/jam82/ansible-molecule-images) ![GitHub last commit](https://img.shields.io/github/last-commit/jam82/ansible-molecule-images) ![GitHub issues](https://img.shields.io/github/issues-raw/jam82/ansible-molecule-images)
+![GitHub](https://img.shields.io/github/license/jomrr/ansible-molecule-images) ![GitHub last commit](https://img.shields.io/github/last-commit/jomrr/ansible-molecule-images) ![GitHub issues](https://img.shields.io/github/issues-raw/jomrr/ansible-molecule-images)
 
 This repository contains a Makefile, Ansible inventory and playbook for building
 Docker images running an init system for use in Ansible Molecule tests.
 
-> This is the successor of the buildah scripts from [buildah-molecule-images](https://github.com/jam82/buildah-molecule-images).
+> This is the successor of the buildah scripts from [buildah-molecule-images](https://github.com/jomrr/buildah-molecule-images).
 
 ## TL;DR
 
@@ -14,7 +14,7 @@ sudo dnf -y install git make python3 python3-pip python3-virtualenv
 
 mkdir -p ~/src/ansible && cd ~/src/ansible
 
-git clone https://github.com/jam82/ansible-molecule-images
+git clone https://github.com/jomrr/ansible-molecule-images
 
 cd ansible-molecule-images
 
@@ -157,9 +157,9 @@ This content is published under the [MIT License](LICENSE).
 
 ## Author(s)
 
-This content was created in 2024 by Jonas Mauer (@jam82).
+This content was created in 2024 by Jonas Mauer (@jomrr).
 
-Thanks to [@fgoebel](https://github.com/fgoebel) for his contributions to [buildah-molecule-images](https://github.com/jam82/buildah-molecule-images). They are included here. Looking forward to collaborating again.
+Thanks to [@fgoebel](https://github.com/fgoebel) for his contributions to [buildah-molecule-images](https://github.com/jomrr/buildah-molecule-images). They are included here. Looking forward to collaborating again.
 
 ## References
 

@@ -1,16 +1,14 @@
 [project]
 name = "ansible-molecule-images"
-version = "0.1.1"
+version = "0.2.0"
 description = "Ansible playbook to build and push container images with init system enabled for molecule tests."
 authors = ["Jonas Mauer"]
 license = "MIT"
 keywords = ["ansible", "docker", "podman", "molecule", "images"]
-repository = "https://github.com/jam82/ansible-molecule-images"
+repository = "https://github.com/jomrr/ansible-molecule-images"
 
 [tool.commitizen]
 name = "cz_conventional_commits"
-version_provider = "pep621"
-tag_format = "v$version"
 
 [tool.semantic_release]
 commit_message = "build(release): version {version}"
