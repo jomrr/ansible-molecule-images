@@ -45,9 +45,6 @@ all:
           build_tags:
             - 2023
             - latest
-        amazonlinux-2:
-          build_tags:
-            - 2
       vars:
         build_image: amazonlinux
         container_image: amazonlinux
