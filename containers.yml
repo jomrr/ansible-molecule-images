@@ -96,10 +96,10 @@ all:
         fedora-40:
           build_tags:
             - 40
+            - latest
         fedora-39:
           build_tags:
             - 39
-            - latest
         fedora-38:
           build_tags:
             - 38
