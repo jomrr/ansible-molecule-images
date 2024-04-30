@@ -83,12 +83,15 @@ dist-clean: clean
 	@rm -rf build/ dist/
 
 # --- Ansible/Build targets ----------------------------------------------------
-.PHONY: $(distributions) all limit
+.PHONY: $(distributions) all docker limit
 
 $(distributions): $(VENV)
 	@$(PLAYBOOK) playbooks/build.yml --limit=$@
 
 all: $(distributions)
+
+docker: $(VENV)
+	@$(PLAYBOOK) playbooks/docker.yml
 
 limit: $(VENV)
 	@$(PLAYBOOK) playbooks/build.yml --limit=$(LIMIT)
