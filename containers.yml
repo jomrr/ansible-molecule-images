@@ -97,9 +97,6 @@ all:
         fedora-39:
           build_tags:
             - 39
-        fedora-38:
-          build_tags:
-            - 38
         fedora-rawhide:
           build_tags:
             - 41

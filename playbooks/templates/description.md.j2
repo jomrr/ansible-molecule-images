@@ -1,0 +1,53 @@
+# Ansible Molecule Docker Images for Debian
+
+This Docker repository contains Ansible Molecule images for Debian. These images are specifically designed to facilitate testing of Ansible roles and playbooks.
+
+## Images
+
+The images in this repository are based on Debian and come with systemd pre-installed. This allows for testing of Ansible roles and playbooks that interact with systemd.
+
+## Debian Versions
+
+The repository provides images for the following Debian versions:
+
+| Version | Tags |
+| ------------ | -------- |
+| Debian 10 (Buster) | 10, buster, oldoldstable |
+| Debian 11 (Bullseye) | 11, bullseye, oldstable |
+| Debian 12 (Bookworm) | 12, bookworm, stable, latest |
+| Debian 13 (Trixie) | 12, trixie |
+| Debian Testing | testing |
+| Debian Sid (Unstable) | sid, unstable |
+
+Each version is tagged accordingly in the repository. For example, to pull the image for Debian `12`, you would use the tag `12` or `bookworm`.
+
+## Usage
+
+To use these images, you can pull them from the Docker repository and use them in your Molecule scenarios.
+
+### Molecule `docker` driver
+
+To use the Debian stable image with docker, you would specify it in your molecule.yml file like so:
+
+```yaml
+platforms:
+  - name: instance
+    image: "jam82:molecule-debian:stable"
+    privileged: true
+```
+
+### Molecule `podman` driver
+
+To use it with the podman driver you can use a molecule configuration like:
+
+```yaml
+platforms:
+  - name: instance
+    image: "jam82:molecule-debian:stable"
+```
+
+This will start a container with Debian stable and systemd as pid 0, which you can then use for testing your Ansible roles and playbooks.
+
+## License
+
+These images are released under the MIT License.

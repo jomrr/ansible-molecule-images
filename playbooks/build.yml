@@ -7,54 +7,51 @@
   tasks:
     - name: "Import variable files"
       ansible.builtin.include_vars:
-        file: "{{ item }}"
-      with_first_found:
-        - files:
-            - "vars/{{ inventory_hostname }}.yml"
-            - "vars/{{ group_names[0] }}.yml"
-            - "vars/default.yml"
+        file: "{{ lookup('ansible.builtin.first_found', params) }}"
+      vars:
+        params:
+          files:
+            - "{{ inventory_hostname }}.yml"
+            - "{{ build_image }}.yml"
+          paths:
+            - 'vars'
+          skip: false
 
     - name: "Create build directory"
       ansible.builtin.file:
-        path: "{{ build_dir }}/{{ inventory_hostname }}"
+        path: "{{ build_dir }}/{{ build_image }}"
         state: directory
         mode: '0755'
 
     - name: "Generate Dockerfile"
       ansible.builtin.template:
         src: Dockerfile.j2
-        dest: "{{ build_dir }}/{{ inventory_hostname }}/Dockerfile"
+        dest: "{{ build_dir }}/{{ build_image }}/{{ inventory_hostname }}"
         mode: '0644'
 
-    - name: "Generate image list"
-      ansible.builtin.set_fact:
-        _images: >-
-          {{
-            _images | default([]) + [
-              { 'tag': item } | combine({ 'image': 'molecule-' + build_image })
-            ]
-          }}
-      loop: "{{ build_tags }}"
-
     - name: "Generate image list per registry"
-      no_log: true
+      no_log: false
       ansible.builtin.set_fact:
-        _registry_images: "{{ _registry_images | default([]) + [item | combine] }}"
-      loop: "{{ push_registries | product(_images) }}"
+        _images: "{{ _images | default([]) + [{'tag': tag, 'image': build_image} | combine(push_registries)] }}"
+      loop: "{{ build_tags }}"
+      loop_control:
+        loop_var: tag
+      vars:
+        _images: []
 
-    - name: "Build container images and push to registry"
+    - name: "Build container images and push to registries"
       no_log: true
       containers.podman.podman_image:
-        name: "{{ item.name }}/{{ item.username }}/{{ item.image }}"
+        name: "{{ item.name }}/{{ item.username }}/molecule-{{ item.image }}"
         build:
-          file: "{{ build_dir }}/{{ inventory_hostname }}/Dockerfile"
+          file: "{{ build_dir }}/{{ build_image }}/{{ inventory_hostname }}"
           force_rm: true
           format: docker
         force: true
-        path: "{{ build_dir }}/{{ inventory_hostname }}"
+        path: "{{ build_dir }}/{{ build_image }}"
         state: build
         tag: "{{ item.tag }}"
         push: true
         username: "{{ item.username }}"
         password: "{{ item.password }}"
-      loop: "{{ _registry_images }}"
+      loop: "{{ _images }}"

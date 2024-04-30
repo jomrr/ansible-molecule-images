@@ -1,0 +1,26 @@
+---
+# repo: jomrr/ansible-molecule-images
+# file: playbooks/docker.yml
+
+# ansible linting error for run-once[task], but strategy is linear ...
+
+- name: "PLAYBOOK | Manage docker repositories"
+  hosts: "{{ target | default('all') }}"
+  gather_facts: false
+  strategy: linear
+  tasks:
+    - name: "Fetch docker repos"  # noqa: run-once
+      run_once: true
+      ansible.builtin.uri:
+        url: "https://registry.hub.docker.com/v2/repositories/{{ item.username }}"
+        method: GET
+        user: "{{ item.username }}"
+        password: "{{ item.password }}"
+      loop: "{{ push_registries }}"
+      register: _docker_repos
+      when: item.name == 'docker.io'
+
+    - name: "Debug docker repos"  # noqa: run-once
+      run_once: true
+      ansible.builtin.debug:
+        msg: "{{ _docker_repos.results | map(attribute='json.results') | flatten | map(attribute='name') | list }}"
