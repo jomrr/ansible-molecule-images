@@ -1,8 +1,58 @@
 # CHANGELOG
 
+## v0.3.0 (2024-06-19)
 
+### Build
+
+* build: remove unnecessary config ([`8695fb2`](https://github.com/jomrr/ansible-molecule-images/commit/8695fb2948143adb57c5fb592602d28064251a72))
+
+* build: push after version ([`6eab1dd`](https://github.com/jomrr/ansible-molecule-images/commit/6eab1dd48603143a403f1c5aa7da42a2745fe811))
+
+### Chore
+
+* chore: Update repository URL in pyproject.toml and README.md ([`493642a`](https://github.com/jomrr/ansible-molecule-images/commit/493642ab146f18151605bf180e6598b3a4855f62))
+
+### Documentation
+
+* docs(license): remove github reference ([`4a5afd3`](https://github.com/jomrr/ansible-molecule-images/commit/4a5afd39f7d45952f840870fa49986a272d0a31b))
+
+### Feature
+
+* feat: add alpine 3.20 ([`38160c7`](https://github.com/jomrr/ansible-molecule-images/commit/38160c7bb3a3a57e2a8c86347a88e6f995563df2))
+
+* feat: add alpine 3.20 ([`34ead09`](https://github.com/jomrr/ansible-molecule-images/commit/34ead09bb469b747f372f235e213c0b1b17aebbc))
+
+* feat: prepare docker repo management ([`0eb3af3`](https://github.com/jomrr/ansible-molecule-images/commit/0eb3af32ec488a13e8da6faeb795fc62af63f790))
+
+* feat: drop amazonlinux-2 ([`6f4749a`](https://github.com/jomrr/ansible-molecule-images/commit/6f4749a46f6f4fa7b71b290f77f3539c58a3df0c))
+
+* feat: tag f40 as latest ([`1d0e071`](https://github.com/jomrr/ansible-molecule-images/commit/1d0e071e388c76a145a1158e325466b99b42f849))
+
+### Fix
+
+* fix: almalinux 9 missing /etc/sudoers ([`76500fe`](https://github.com/jomrr/ansible-molecule-images/commit/76500fe10bad21e9879a8c698583b7b1e313fe2a))
+
+* fix: almalinux 9 missing /etc/sudoers ([`446d562`](https://github.com/jomrr/ansible-molecule-images/commit/446d562eb66c1a8a1302edb534e9801de7966e1e))
+
+* fix: fix ansible become with root ([`db84f56`](https://github.com/jomrr/ansible-molecule-images/commit/db84f56bbad0ad500f6bab8a370c3b57c73bc479))
+
+### Unknown
+
+* Merge branch &#39;dev&#39; ([`e9ea3f3`](https://github.com/jomrr/ansible-molecule-images/commit/e9ea3f31e6e79bc95c6d3f5713c1e1dac29843e7))
+
+* Merge branch &#39;dev&#39; ([`f02bb56`](https://github.com/jomrr/ansible-molecule-images/commit/f02bb56c319224b837f1d399b44fee45ea8282cd))
+
+* Merge branch &#39;dev&#39; ([`5c4bcc6`](https://github.com/jomrr/ansible-molecule-images/commit/5c4bcc61a0eef6ed4467effd36d627360e03f95f))
+
+* Merge branch &#39;dev&#39; ([`9f4fba9`](https://github.com/jomrr/ansible-molecule-images/commit/9f4fba9bb63987ad15b8c6f4c5cc297b318bba15))
+
+* merge remote-tracking branch &#39;refs/remotes/origin/dev&#39; into dev ([`129f73e`](https://github.com/jomrr/ansible-molecule-images/commit/129f73e6be1577aae341367dcc3d2ecb35a2a05b))
 
 ## v0.2.0 (2024-03-17)
+
+### Build
+
+* build(release): version 0.2.0 ([`f602fb0`](https://github.com/jomrr/ansible-molecule-images/commit/f602fb0aa1bad221bfa109315162879bdb723566))
 
 ### Feature
 
@@ -26,6 +76,7 @@
 
 * Merge branch &#39;dev&#39; ([`6b68a77`](https://github.com/jomrr/ansible-molecule-images/commit/6b68a77059c779f86519b06b44b60b8947b9f2b0))
 
+* Merge branch &#39;dev&#39; ([`b723ec6`](https://github.com/jomrr/ansible-molecule-images/commit/b723ec6902eb78bc87dd2e41071b6cfd278b313a))
 
 ## v0.1.1 (2024-02-20)
 
@@ -54,7 +105,6 @@
 ### Unknown
 
 * Merge branch &#39;main&#39; into dev ([`ea693d8`](https://github.com/jomrr/ansible-molecule-images/commit/ea693d86dac664165625fc271c7a5b48771dafdc))
-
 
 ## v0.1.0 (2024-02-19)
 
