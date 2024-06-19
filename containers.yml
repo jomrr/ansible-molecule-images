@@ -26,10 +26,13 @@ all:
         container_image: almalinux
     alpine:
       hosts:
+        alpine-3.20:
+          build_tags:
+            - 3.20
+            - latest
         alpine-3.19:
           build_tags:
             - 3.19
-            - latest
         alpine-3.18:
           build_tags:
             - 3.18
@@ -142,13 +145,12 @@ all:
         ubuntu-24.04:
           build_tags:
             - 24.04
-            - devel
             - noble
+            - latest
         ubuntu-22.04:
           build_tags:
             - 22.04
             - jammy
-            - latest
         ubuntu-20.04:
           build_tags:
             - 20.04
