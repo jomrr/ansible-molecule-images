@@ -31,4 +31,5 @@ dockerfile:
     - rm -f /lib/systemd/system/basic.target.wants/*
     - rm -f /lib/systemd/system/anaconda.target.wants/*
     - systemctl mask getty.service
+    - touch /etc/sudoers
     - sed -i -e 's/^\\(Defaults\\s*requiretty\\)/#--- \\1/' /etc/sudoers
