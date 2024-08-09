@@ -40,7 +40,7 @@
         _images: []
 
     - name: "Build container images and push to registries"
-      no_log: true
+      no_log: false
       containers.podman.podman_image:
         name: "{{ item.name }}/{{ item.username }}/molecule-{{ item.image }}"
         build:

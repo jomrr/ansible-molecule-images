@@ -27,4 +27,6 @@ dockerfile:
     - rm -f /usr/lib/systemd/system/sockets.target.wants/*initctl*
     - rm -f /usr/lib/systemd/system/basic.target.wants/*
     - systemctl mask getty.service
+    - touch /etc/sudoers
     - sed -ie 's/^\(Defaults\s*requiretty\)/#--- \1/' /etc/sudoers
+    - echo "root    ALL=(ALL:ALL) ALL" >> /etc/sudoers
