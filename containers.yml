@@ -28,7 +28,8 @@ all:
       hosts:
         alpine-3.20:
           build_tags:
-            - 3.20
+            - "3.20"
+            - 3
             - latest
         alpine-3.19:
           build_tags:
@@ -93,6 +94,9 @@ all:
         container_image: debian
     fedora:
       hosts:
+        fedora-41:
+          build_tags:
+            - 41
         fedora-40:
           build_tags:
             - 40
@@ -102,7 +106,7 @@ all:
             - 39
         fedora-rawhide:
           build_tags:
-            - 41
+            - 42
             - rawhide
       vars:
         build_image: fedora
@@ -114,12 +118,6 @@ all:
             - 15.6
             - 15
             - latest
-        opensuse-leap-15.5:
-          build_tags:
-            - 15.5
-        opensuse-leap-15.4:
-          build_tags:
-            - 15.4
         opensuse-tumbleweed:
           build_image: opensuse-tumbleweed
           build_tags:

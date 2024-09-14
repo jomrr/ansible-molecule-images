@@ -37,13 +37,21 @@ help:
 	@echo "Usage: make [target] [LIMIT=<hostname or group>]"
 	@echo
 	@echo "Targets:"
-	@echo "  all        - build all distributions"
-	@echo "  clean      - remove virtual environment"
-	@echo "  dist-clean - remove virtual environment and build artifacts"
 	@echo "  install    - create virtual environment"
-	@echo "  limit      - build artifacts limited to LIMIT parameter"
 	@echo "  upgrade    - update requirements in virtual environment"
+	@echo "  all        - build all distributions"
 	@echo "  <distro>   - build specific distribution"
+	@echo "  clean      - remove virtual environment"
+	@echo "  commit     - commit changes to the current branch"
+	@echo "  dist-clean - remove virtual environment and build artifacts"
+	@echo "  docker     - build docker images"
+	@echo "  limit      - build artifacts limited to LIMIT parameter"
+	@echo "  prepare-release - prepare a release and merge dev to main"
+	@echo "  version    - bump the version number and update the changelog"
+	@echo "  publish    - create a new Git tag and build the distribution files"
+	@echo "  checkout-dev - checkout the dev branch"
+	@echo "  start-feature - start a new feature branch"
+	@echo "  merge-feature-to-dev - merge a feature branch to dev"
 	@echo
 	@echo "Supported distributions:"
 	@echo "  $(distributions)"
@@ -55,7 +63,7 @@ $(DEPS):
 	@echo "" >> $@
 
 $(REQS):
-	@echo "ansible >= 2.15" > $@
+	@echo "ansible" > $@
 	@echo "commitizen" >> $@
 	@echo "pre-commit" >> $@
 	@echo "python-semantic-release" >> $@
@@ -85,7 +93,7 @@ dist-clean: clean
 # --- Ansible/Build targets ----------------------------------------------------
 .PHONY: $(distributions) all docker limit
 
-$(distributions): $(VENV)
+$(distributions): | $(VENV)
 	@$(PLAYBOOK) playbooks/build.yml --limit=$@
 
 all: $(distributions)
