@@ -97,13 +97,10 @@ all:
         fedora-41:
           build_tags:
             - 41
+            - latest
         fedora-40:
           build_tags:
             - 40
-            - latest
-        fedora-39:
-          build_tags:
-            - 39
         fedora-rawhide:
           build_tags:
             - 42
