@@ -1,8 +1,26 @@
 # CHANGELOG
 
+## v0.4.0 (2024-11-16)
+
+### Feature
+
+* feat: add fedora 41 as latest ([`c05df72`](https://github.com/jomrr/ansible-molecule-images/commit/c05df72febee4e86b8513453627fb5ae47793252))
+
+### Fix
+
+* fix: image tagging and nolog
+
+- ensure correct tag for alpine 3.20
+- correct tagging for current fedora versions
+- nolog true for push list ([`0dcc72e`](https://github.com/jomrr/ansible-molecule-images/commit/0dcc72eab75984518b1b0725d482efafcd65ae59))
+
+* fix: missing sudoers in leap 15.6 ([`f4a7c7e`](https://github.com/jomrr/ansible-molecule-images/commit/f4a7c7e63e992dad1dbd425327459e4eefcdc5a9))
+
 ## v0.3.0 (2024-06-19)
 
 ### Build
+
+* build(release): version 0.3.0 ([`3b558e2`](https://github.com/jomrr/ansible-molecule-images/commit/3b558e2ecbf439c41c9392044aeeb00f897b2c7c))
 
 * build: remove unnecessary config ([`8695fb2`](https://github.com/jomrr/ansible-molecule-images/commit/8695fb2948143adb57c5fb592602d28064251a72))
 
@@ -18,9 +36,9 @@
 
 ### Feature
 
-* feat: add alpine 3.20 ([`38160c7`](https://github.com/jomrr/ansible-molecule-images/commit/38160c7bb3a3a57e2a8c86347a88e6f995563df2))
-
 * feat: add alpine 3.20 ([`34ead09`](https://github.com/jomrr/ansible-molecule-images/commit/34ead09bb469b747f372f235e213c0b1b17aebbc))
+
+* feat: add alpine 3.20 ([`38160c7`](https://github.com/jomrr/ansible-molecule-images/commit/38160c7bb3a3a57e2a8c86347a88e6f995563df2))
 
 * feat: prepare docker repo management ([`0eb3af3`](https://github.com/jomrr/ansible-molecule-images/commit/0eb3af32ec488a13e8da6faeb795fc62af63f790))
 
@@ -30,9 +48,9 @@
 
 ### Fix
 
-* fix: almalinux 9 missing /etc/sudoers ([`76500fe`](https://github.com/jomrr/ansible-molecule-images/commit/76500fe10bad21e9879a8c698583b7b1e313fe2a))
-
 * fix: almalinux 9 missing /etc/sudoers ([`446d562`](https://github.com/jomrr/ansible-molecule-images/commit/446d562eb66c1a8a1302edb534e9801de7966e1e))
+
+* fix: almalinux 9 missing /etc/sudoers ([`76500fe`](https://github.com/jomrr/ansible-molecule-images/commit/76500fe10bad21e9879a8c698583b7b1e313fe2a))
 
 * fix: fix ansible become with root ([`db84f56`](https://github.com/jomrr/ansible-molecule-images/commit/db84f56bbad0ad500f6bab8a370c3b57c73bc479))
 
@@ -86,8 +104,6 @@
 
 * build: merge main back to dev after version ([`bcb3d9c`](https://github.com/jomrr/ansible-molecule-images/commit/bcb3d9c1dc28465ce15f32558499186c77e4ef8e))
 
-* build: remove custom build command and publish src ([`94334a4`](https://github.com/jomrr/ansible-molecule-images/commit/94334a4f7cb6b707c0535ddff761bef76d8fcb4e))
-
 ### Fix
 
 * fix: entrypoint for systemd ([`e4e72b5`](https://github.com/jomrr/ansible-molecule-images/commit/e4e72b51f7d02307793bae818fe905d250db9e19))
@@ -111,6 +127,8 @@
 ### Build
 
 * build(release): 0.1.0 ([`69a2df8`](https://github.com/jomrr/ansible-molecule-images/commit/69a2df85169057d5833fd53b67af30341d1c0414))
+
+* build: remove custom build command and publish src ([`94334a4`](https://github.com/jomrr/ansible-molecule-images/commit/94334a4f7cb6b707c0535ddff761bef76d8fcb4e))
 
 ### Feature
 
