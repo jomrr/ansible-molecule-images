@@ -37,9 +37,6 @@ all:
         alpine-3.18:
           build_tags:
             - 3.18
-        alpine-3.17:
-          build_tags:
-            - 3.17
       vars:
         build_image: alpine
         container_image: alpine
@@ -94,16 +91,16 @@ all:
         container_image: debian
     fedora:
       hosts:
+        fedora-42:
+          build-tags:
+            - 42
+            - latest
         fedora-41:
           build_tags:
             - 41
-            - latest
-        fedora-40:
-          build_tags:
-            - 40
         fedora-rawhide:
           build_tags:
-            - 42
+            - 43
             - rawhide
       vars:
         build_image: fedora
