@@ -92,7 +92,7 @@ all:
     fedora:
       hosts:
         fedora-42:
-          build-tags:
+          build_tags:
             - 42
             - adams
             - latest
