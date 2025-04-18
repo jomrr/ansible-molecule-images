@@ -94,6 +94,7 @@ all:
         fedora-42:
           build-tags:
             - 42
+            - adams
             - latest
         fedora-41:
           build_tags:
