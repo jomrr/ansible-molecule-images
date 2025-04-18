@@ -1,6 +1,6 @@
 [project]
 name = "ansible-molecule-images"
-version = "0.4.0"
+version = "0.5.0"
 description = "Ansible playbook to build and push container images with init system enabled for molecule tests."
 authors = ["Jonas Mauer"]
 license = "MIT"
