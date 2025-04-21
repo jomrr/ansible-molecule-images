@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.5.1 (2025-04-21)
+
+### Bug Fixes
+
+- Fedora: add missing python3-libdnf5
+  ([`79d6ea8`](https://github.com/jomrr/ansible-molecule-images/commit/79d6ea8d93d38b1f1d672421528d14db15063aa0))
+
+
 ## v0.5.0 (2025-04-18)
 
 ### Bug Fixes
