@@ -16,7 +16,7 @@ dockerfile:
     - iproute
     - passwd
     - procps
-    - python3
+    - python3-libdnf5
     - sudo
     - systemd
   package_clean: "dnf -qy autoremove && dnf -qy clean all"
