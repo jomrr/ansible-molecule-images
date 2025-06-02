@@ -14,10 +14,13 @@ all:
   children:
     almalinux:
       hosts:
+        almalinux-10:
+          build_tags:
+            - 10
+            - latest
         almalinux-9:
           build_tags:
             - 9
-            - latest
         almalinux-8:
           build_tags:
             - 8

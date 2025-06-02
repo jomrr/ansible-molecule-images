@@ -1,3 +1,5 @@
+# Ansible Molecule Images .gitignore
+.ansible
 # Release artifacts ------------------------------------------------------------
 build/
 dist/
