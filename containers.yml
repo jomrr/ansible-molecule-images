@@ -29,17 +29,17 @@ all:
         container_image: almalinux
     alpine:
       hosts:
-        alpine-3.20:
+        alpine-3.22:
           build_tags:
-            - "3.20"
+            - 3.22
             - 3
             - latest
-        alpine-3.19:
+        alpine-3.21:
           build_tags:
-            - 3.19
-        alpine-3.18:
+            - 3.21
+        alpine-3.20:
           build_tags:
-            - 3.18
+            - 3.20
       vars:
         build_image: alpine
         container_image: alpine
