@@ -77,11 +77,6 @@ all:
             - bullseye
             - 11
             - oldstable
-        debian-10:
-          build_tags:
-            - buster
-            - 10
-            - oldoldstable
         debian-sid:
           build_tags:
             - sid

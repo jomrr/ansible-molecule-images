@@ -9,7 +9,7 @@ VENV			:= .venv
 PIP				:= $(VENV)/bin/pip
 # --- Ansible ------------------------------------------------------------------
 GALAXY			:= $(VENV)/bin/ansible-galaxy
-INVENTORY 		:= $(VENV)/bin/ansible-inventory --list  --limit
+INVENTORY 		:= $(VENV)/bin/ansible-inventory --list --limit
 PLAYBOOK		:= $(VENV)/bin/ansible-playbook
 # --- Makefile -----------------------------------------------------------------
 LIMIT			?= fedora
