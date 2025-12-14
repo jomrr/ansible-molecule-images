@@ -21,25 +21,25 @@ all:
         almalinux-9:
           build_tags:
             - 9
-        almalinux-8:
-          build_tags:
-            - 8
       vars:
         build_image: almalinux
         container_image: almalinux
     alpine:
       hosts:
+        alpine-3.23:
+          build_tags:
+            - "3.23"
+            - "3"
+            - latest
         alpine-3.22:
           build_tags:
-            - 3.22
-            - 3
-            - latest
+            - "3.22"
         alpine-3.21:
           build_tags:
-            - 3.21
+            - "3.21"
         alpine-3.20:
           build_tags:
-            - 3.20
+            - "3.20"
       vars:
         build_image: alpine
         container_image: alpine
@@ -47,7 +47,7 @@ all:
       hosts:
         amazonlinux-2023:
           build_tags:
-            - 2023
+            - "2023"
             - latest
       vars:
         build_image: amazonlinux
@@ -89,45 +89,51 @@ all:
         container_image: debian
     fedora:
       hosts:
+        fedora-43:
+          build_tags:
+            - 43
+            - latest
         fedora-42:
           build_tags:
             - 42
             - adams
             - latest
-        fedora-41:
-          build_tags:
-            - 41
         fedora-rawhide:
           build_tags:
-            - 43
+            - 44
             - rawhide
       vars:
         build_image: fedora
         container_image: fedora
     opensuse:
       hosts:
-        opensuse-leap-15.6:
+        opensuse-leap-16:
           build_tags:
-            - 15.6
-            - 15
-            - latest
+            - "16.0"
+            - "16"
+            - "latest"
+        opensuse-leap-15:
+          build_tags:
+            - "15.6"
+            - "15"
+            - "latest"
         opensuse-tumbleweed:
           build_image: opensuse-tumbleweed
           build_tags:
-            - latest
+            - "latest"
           container_image: opensuse/tumbleweed
       vars:
         build_image: opensuse-leap
         container_image: opensuse/leap
     oraclelinux:
       hosts:
+        oraclelinux-10:
+          build_tags:
+            - "10"
+            - "latest"
         oraclelinux-9:
           build_tags:
-            - 9
-            - latest
-        oraclelinux-8:
-          build_tags:
-            - 8
+            - "9"
       vars:
         build_image: oraclelinux
         container_image: oraclelinux
@@ -135,16 +141,16 @@ all:
       hosts:
         ubuntu-24.04:
           build_tags:
-            - 24.04
+            - "24.04"
             - noble
             - latest
         ubuntu-22.04:
           build_tags:
-            - 22.04
+            - "22.04"
             - jammy
         ubuntu-20.04:
           build_tags:
-            - 20.04
+            - "20.04"
             - focal
       vars:
         build_image: ubuntu
