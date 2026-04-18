@@ -16,30 +16,30 @@ all:
       hosts:
         almalinux-10:
           build_tags:
-            - 10
-            - latest
+            - "10"
+            - "latest"
         almalinux-9:
           build_tags:
-            - 9
+            - "9"
       vars:
         build_image: almalinux
         container_image: almalinux
     alpine:
       hosts:
+        alpine-edge:
+          build_tags:
+            - "edge"
         alpine-3.23:
           build_tags:
             - "3.23"
             - "3"
-            - latest
+            - "latest"
         alpine-3.22:
           build_tags:
             - "3.22"
         alpine-3.21:
           build_tags:
             - "3.21"
-        alpine-3.20:
-          build_tags:
-            - "3.20"
       vars:
         build_image: alpine
         container_image: alpine
@@ -48,7 +48,7 @@ all:
         amazonlinux-2023:
           build_tags:
             - "2023"
-            - latest
+            - "latest"
       vars:
         build_image: amazonlinux
         container_image: amazonlinux
@@ -56,7 +56,7 @@ all:
       hosts:
         archlinux-latest:
           build_tags:
-            - latest
+            - "latest"
       vars:
         build_image: archlinux
         container_image: archlinux
@@ -64,44 +64,47 @@ all:
       hosts:
         debian-13:
           build_tags:
-            - trixie
-            - 13
+            - "trixie"
+            - "13"
+            - "latest"
+            - "stable"
         debian-12:
           build_tags:
-            - bookworm
-            - 12
-            - latest
-            - stable
+            - "bookworm"
+            - "12"
+            - "oldstable"
         debian-11:
           build_tags:
-            - bullseye
-            - 11
-            - oldstable
+            - "bullseye"
+            - "11"
+            - "oldoldstable"
         debian-sid:
           build_tags:
-            - sid
-            - unstable
+            - "sid"
+            - "unstable"
         debian-testing:
           build_tags:
-            - testing
+            - "testing"
       vars:
         build_image: debian
         container_image: debian
     fedora:
       hosts:
+        fedora-44:
+          build_tags:
+            - "44"
         fedora-43:
           build_tags:
-            - 43
-            - latest
+            - "43"
+            - "latest"
         fedora-42:
           build_tags:
-            - 42
-            - adams
-            - latest
+            - "42"
+            - "adams"
         fedora-rawhide:
           build_tags:
-            - 44
-            - rawhide
+            - "45"
+            - "rawhide"
       vars:
         build_image: fedora
         container_image: fedora
@@ -116,7 +119,6 @@ all:
           build_tags:
             - "15.6"
             - "15"
-            - "latest"
         opensuse-tumbleweed:
           build_image: opensuse-tumbleweed
           build_tags:
@@ -139,19 +141,23 @@ all:
         container_image: oraclelinux
     ubuntu:
       hosts:
+        ubuntu-26.04:
+          build_tags:
+            - "26.04"
+            - "resolute"
         ubuntu-24.04:
           build_tags:
             - "24.04"
-            - noble
-            - latest
+            - "noble"
+            - "latest"
         ubuntu-22.04:
           build_tags:
             - "22.04"
-            - jammy
+            - "jammy"
         ubuntu-20.04:
           build_tags:
             - "20.04"
-            - focal
+            - "focal"
       vars:
         build_image: ubuntu
         container_image: ubuntu

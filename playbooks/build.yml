@@ -48,6 +48,7 @@
           file: "{{ build_dir }}/{{ build_image }}/{{ inventory_hostname }}"
           force_rm: true
           format: docker
+          extra_args: "--network pasta:--ipv4-only"
         force: true
         path: "{{ build_dir }}/{{ build_image }}"
         state: build

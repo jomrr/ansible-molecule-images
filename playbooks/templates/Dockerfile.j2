@@ -2,13 +2,13 @@ FROM {{ dockerfile.from }}:{{ build_tags[0] }}
 
 # Set maintainer
 LABEL maintainer="{{ build_maintainer }}"
-MAINTAINER {{ build_maintainer }}
+LABEL org.opencontainers.image.authors="{{ build_maintainer }}"
 
 # Set environment variables
 {% for env_var, value in dockerfile.environment.items() %}
 ENV {{ env_var }}={{ value }}
 {% endfor %}
-ENV timestamp={{ ansible_date_time.iso8601 }}
+ENV timestamp={{ ansible_facts['date_time']['iso8601'] }}
 
 # Install dependencies and run commands
 RUN {{ dockerfile.package_update }} && \
