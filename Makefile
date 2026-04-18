@@ -105,47 +105,68 @@ limit: $(VENV)
 	@$(PLAYBOOK) playbooks/build.yml --limit=$(LIMIT)
 
 # --- git targets --------------------------------------------------------------
-.PHONY: checkout-dev commit start-feature merge-feature-to-dev prepare-release
 
 # checkout the dev branch
+.PHONY: checkout-dev
 checkout-dev:
 	@git checkout dev
 
 # commit changes to the current branch
+.PHONY: commit
 commit:
 	@git add .
 	@git commit
 
 # start a new feature branch
+.PHONY: start-feature
 start-feature:
 	@git checkout -b $(FEATURE) dev
 
 # merge a feature branch to dev
+.PHONY: merge-feature-to-dev
 merge-feature-to-dev:
 	@git checkout dev
 	@git merge $(FEATURE)
 	@git branch -d $(FEATURE)
 
 # prepare a release and merge dev to main
+.PHONY: prepare-release
 prepare-release:
 	@git push origin dev
 	@git checkout main
-	@git merge dev
+	@git pull --ff-only origin main
+	@git merge --ff-only dev
 	@git push origin main
 	@git checkout dev
 
 # bump the version number and update the changelog
+.PHONY: version
 version:
 	@git checkout main
 	@semantic-release version
 	@git push origin main
 	@git checkout dev
-	@git merge main
+	@git pull --ff-only origin dev
+	@git merge --ff-only main
 	@git push origin dev
 
 # upload built distribution files to an existing release
+.PHONY: publish
 publish:
 	@git checkout main
 	@semantic-release publish
 	@git push origin main --tags
 	@git checkout dev
+
+# merge dev to main and create a new release, push changes to both branches
+.PHONY: release
+release:
+	@git checkout main
+	@git pull --ff-only origin main
+	@git merge --ff-only dev
+	@semantic-release version
+	@git push origin main --tags
+	@git checkout dev
+	@git pull --ff-only origin dev
+	@git merge --ff-only main
+	@git push origin dev

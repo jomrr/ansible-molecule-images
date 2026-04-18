@@ -41,7 +41,7 @@ make upgrade
 
 ## Description
 
-The playbook [`playbooks/build.yml`](playbooks/build.yml) utilizes the `ansible.builtin.template` module to render Dockerfiles to the directory `build/{{ inventory_hostname }}/Dockerfile` and then uses the `containers.podman,podman_image` module to build and push the images to the configured registries from the inventory file [`containers.yml`](containers.yml). In this file the registries and its credentials are listed as `list of dictionaries` under the key `push_registries`. The name of the built image is configured in `build_image` as host_var, the tags in `build_tags`, also as host_vars.
+The playbook [`playbooks/build.yml`](playbooks/build.yml) utilizes the `ansible.builtin.template` module to render Dockerfiles to the directory `build/{{ inventory_hostname }}/Dockerfile` and then uses the `containers.podman.podman_image` module to build and push the images to the configured registries from the inventory file [`containers.yml`](containers.yml). In this file the registries and its credentials are listed as `list of dictionaries` under the key `push_registries`. The name of the built image is configured in `build_image` as host_var, the tags in `build_tags`, also as host_vars.
 
 ## Inventory variables in [`containers.yml`](containers.yml)
 
@@ -71,7 +71,7 @@ The following prerequisites must be installed before using this playbook.
 
 - `git`
 - `make`
-- `python3` >= 3.6
+- `python3` >= 3.12
 - `python3-pip`
 - `python3-virtualenv`
 
@@ -79,13 +79,13 @@ The following prerequisites must be installed before using this playbook.
 
 The python prerquisites are installed in a virtualenv `.venv` via the Makefile with `make install`.
 
-- ansible >= 2.15
+- ansible >= 2.18
 
 To install it manually for your user without virtualenv run:
 
 ```bash
 pip install --user --upgrade pip
-pip install --user --upgrade ansible >= 2.15
+pip install --user --upgrade ansible >= 2.18
 ```
 
 For development the following are also installed by `make install`:
