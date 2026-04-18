@@ -143,6 +143,7 @@ prepare-release:
 .PHONY: version
 version:
 	@git checkout main
+	@git pull --ff-only origin main
 	@semantic-release version
 	@git push origin main
 	@git checkout dev
