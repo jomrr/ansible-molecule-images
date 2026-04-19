@@ -8,7 +8,6 @@ LABEL org.opencontainers.image.authors="{{ build_maintainer }}"
 {% for env_var, value in dockerfile.environment.items() %}
 ENV {{ env_var }}={{ value }}
 {% endfor %}
-ENV timestamp={{ ansible_facts['date_time']['iso8601'] }}
 
 # Install dependencies and run commands
 RUN {{ dockerfile.package_update }} && \

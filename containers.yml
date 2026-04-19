@@ -174,10 +174,6 @@ all:
           push_tags:
             - "22.04"
             - "jammy"
-        ubuntu-20.04:
-          push_tags:
-            - "20.04"
-            - "focal"
       vars:
         display_name: "Ubuntu"
         pull_image: "ubuntu"
