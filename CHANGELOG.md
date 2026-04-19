@@ -2,6 +2,35 @@
 
 <!-- version list -->
 
+## v2.1.0 (2026-04-19)
+
+### Build System
+
+- Automate and document release process with stricter versioning
+  ([`e15dc07`](https://github.com/jomrr/ansible-molecule-images/commit/e15dc0779c8b91e5ee5a5f372be53a5a9fda1086))
+
+- Refactor Makefile and docs for robustness, clarity, and release flow
+  ([`2b7abfc`](https://github.com/jomrr/ansible-molecule-images/commit/2b7abfc800b6bda61f2b285039b93bcf0afe8a55))
+
+### Chores
+
+- Enforce fast-forward updates before versioning steps
+  ([`c89e728`](https://github.com/jomrr/ansible-molecule-images/commit/c89e7285f1cd72bd77ecce8aa30e8c90fa805ed2))
+
+- Remove changelog from project files
+  ([`f5e7835`](https://github.com/jomrr/ansible-molecule-images/commit/f5e7835d546653798818500570fa56d3ef60f85b))
+
+### Documentation
+
+- **changelog**: Regenerate changelog
+  ([`599608f`](https://github.com/jomrr/ansible-molecule-images/commit/599608f254c35bf6128808e2798f2ff6b5a3ab5a))
+
+### Features
+
+- **Makefile**: Add dockerhub target to update repo metadata
+  ([`cdc01aa`](https://github.com/jomrr/ansible-molecule-images/commit/cdc01aaad2f3c251419984672ae6b25de8f4411c))
+
+
 ## Unreleased
 
 ### Chores
