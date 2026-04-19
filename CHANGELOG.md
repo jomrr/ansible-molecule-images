@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v2.1.2 (2026-04-19)
+
+### Bug Fixes
+
+- Self-defeating perfectionism
+  ([`3f947a5`](https://github.com/jomrr/ansible-molecule-images/commit/3f947a563239ef4e045d48355ea370a93ca5ac22))
+
+### Documentation
+
+- Simplify and clarify configuration variables documentation
+  ([`b09aea3`](https://github.com/jomrr/ansible-molecule-images/commit/b09aea3bb2b39effa597018351b8e97aefe96af9))
+
+
 ## v2.1.1 (2026-04-19)
 
 ### Bug Fixes
