@@ -56,18 +56,18 @@ the key `push_registries`. The name of the built image is configured via the hos
 
 Any of these variables can be set at all, group or host level, where host level has the highest precedence.
 
-| variable | scope | type | default | example | description |
-| -------- | ----- | ---- | ------- | ------- | ----------- |
-| ansible_connection | all | str | local | <= | ansible_connection=local for inventory hosts |
-| build_dir | all | str | "../build" | <= | transient build directory in repository root |
-| build_maintainer | all | str | Jonas Mauer <<jam@kabelmail.net>> | <= | build maintainer metadata used in OCI labels in generated Dockerfile |
-| display_name | group | str | None | `AlmaLinux` |display name of the distribution the image is based on |
-| pull_image | group | str | None | `opensuse/tumbleweed` |name of the image to use in FROM statement in generated Dockerfile |
-| pull_registry | all | str | docker.io | <= | the container registry from where an image is pulled from |
-push_image | group | str | None | `opensuse-leap` | name/slug of the built image |
-| push_repo | group | str | None | `molecule-alpine` | repo name of the built image, e.g. molecule-fedora |
-| push_tags | host | list=str | None | `["42", "adams"]` | tags for the built images |
-| push_registries | all | list=dict | [ { name: docker.io, username: "{{ lookup('ansible.builtin.env', 'DOCKER_USER') }}", password: "{{ lookup('ansible.builtin.env', 'DOCKER_SECRET') }}" } ] | <= | list of registry definitions as dictionaries to which the built images are pushed |
+| variable | type | default | example | description |
+| -------- | ---- | ------- | ------- | ----------- |
+| ansible_connection | str | local | <= | ansible_connection=local for inventory hosts |
+| build_dir | str | "../build" | <= | transient build directory in repository root |
+| build_maintainer | str | Jonas Mauer <<jam@kabelmail.net>> | <= | build maintainer metadata used in OCI labels in generated Dockerfile |
+| display_name | str | - | `AlmaLinux` |display name of the distribution the image is based on |
+| pull_image | str | - | `opensuse/tumbleweed` |name of the image to use in FROM statement in generated Dockerfile |
+| pull_registry | str | docker.io | <= | the container registry from where an image is pulled from |
+push_image | str | - | `opensuse-leap` | name/slug of the built image |
+| push_repo | str | - | `molecule-alpine` | repo name of the built image, e.g. molecule-fedora |
+| push_tags | list=str | - | `["42", "adams"]` | tags for the built images |
+| push_registries | list=dict | [ { name: docker.io, username: "{{ lookup('ansible.builtin.env', 'DOCKER_USER') }}", password: "{{ lookup('ansible.builtin.env', 'DOCKER_SECRET') }}" } ] | <= | list of registry definitions as dictionaries to which the built images are pushed |
 
 ## Getting Started
 
