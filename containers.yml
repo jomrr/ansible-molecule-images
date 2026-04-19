@@ -7,7 +7,7 @@ all:
     ansible_connection: "local"
     build_dir: "../build"
     build_maintainer: "Jonas Mauer <jam@kabelmail.net>"
-    build_no_log: true
+    build_no_log: false
     pull_registry: "docker.io"
     push_registries:
       - name: "docker.io"
