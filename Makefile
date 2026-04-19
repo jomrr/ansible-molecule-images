@@ -2,11 +2,21 @@
 # name: ansible-molecule-images
 # file: Makefile
 
+MAKEFLAGS	+= --no-builtin-rules
+MAKEFLAGS	+= --warn-undefined-variables
+
+SHELL		:= /bin/bash
+.SHELLFLAGS	:= -euo pipefail -c
+
+.DEFAULT_GOAL	:= help
+
 # --- Python virtual environment -----------------------------------------------
 DEPS			:= requirements.yml
 REQS			:= requirements.txt
 VENV			:= .venv
-PIP				:= $(VENV)/bin/pip
+PIP			:= $(VENV)/bin/pip
+PRE_COMMIT		:= $(VENV)/bin/pre-commit
+PSR			:= $(VENV)/bin/semantic-release
 # --- Ansible ------------------------------------------------------------------
 GALAXY			:= $(VENV)/bin/ansible-galaxy
 INVENTORY 		:= $(VENV)/bin/ansible-inventory --list --limit
@@ -32,26 +42,38 @@ distributions	:= \
 
 # default target
 .PHONY: help
-
 help:
-	@echo "Usage: make [target] [LIMIT=<hostname or group>]"
+	@echo "Usage: make <target> [LIMIT=<hostname|group>] [FEATURE=<branch-name>]"
+	@echo
+	@echo "Environment:"
+	@echo "  LIMIT=<hostname|group>   Limit Ansible build targets (default: $(LIMIT))"
+	@echo "  FEATURE=<branch-name>    Feature branch name for start-feature / merge-feature-to-dev"
 	@echo
 	@echo "Targets:"
-	@echo "  install    - create virtual environment"
-	@echo "  upgrade    - update requirements in virtual environment"
-	@echo "  all        - build all distributions"
-	@echo "  <distro>   - build specific distribution"
-	@echo "  clean      - remove virtual environment"
-	@echo "  commit     - commit changes to the current branch"
-	@echo "  dist-clean - remove virtual environment and build artifacts"
-	@echo "  docker     - build docker images"
-	@echo "  limit      - build artifacts limited to LIMIT parameter"
-	@echo "  prepare-release - prepare a release and merge dev to main"
-	@echo "  version    - bump the version number and update the changelog"
-	@echo "  publish    - create a new Git tag and build the distribution files"
-	@echo "  checkout-dev - checkout the dev branch"
-	@echo "  start-feature - start a new feature branch"
-	@echo "  merge-feature-to-dev - merge a feature branch to dev"
+	@echo "  help                  Show this help"
+	@echo "  install               Create the Python virtual environment and install dependencies"
+	@echo "  upgrade               Upgrade Python and Ansible dependencies in the virtual environment"
+	@echo "  clean                 Remove the virtual environment and generated dependency files"
+	@echo "  dist-clean            Remove the virtual environment and build artifacts"
+	@echo "  mrproper              Alias for dist-clean"
+	@echo
+	@echo "Build:"
+	@echo "  all                   Build all supported distributions"
+	@echo "  <distro>              Build a specific distribution"
+	@echo "  docker                Update docker repository description"
+	@echo "  limit                 Build artifacts limited to LIMIT=<hostname|group>"
+	@echo
+	@echo "Git workflow:"
+	@echo "  checkout-dev          Switch to the dev branch"
+	@echo "  commit                Stage all changes and create a commit"
+	@echo "  start-feature         Create a new feature branch from dev (requires FEATURE=...)"
+	@echo "  merge-feature-to-dev  Merge FEATURE into dev and delete the feature branch"
+	@echo
+	@echo "Release workflow:"
+	@echo "  prepare-release       Push dev, fast-forward merge dev into main locally, then switch back to dev"
+	@echo "  version               Run semantic-release on main, then merge main back into dev"
+	@echo "  publish               Upload built distribution files to an existing release on main"
+	@echo "  release               Merge dev into main, run semantic-release, then merge main back into dev"
 	@echo
 	@echo "Supported distributions:"
 	@echo "  $(distributions)"
@@ -73,24 +95,28 @@ $(VENV): $(REQS) $(DEPS)
 	@$(PIP) install --upgrade pip
 	@$(PIP) install -r requirements.txt
 	@$(GALAXY) install -r $(DEPS)
-	@pre-commit install --hook-type commit-msg
+	@$(PRE_COMMIT) install --hook-type commit-msg
 
-.PHONY: install upgrade clean dist-clean
+# --- General make targets ----------------------------------------------------
 
+.PHONY: install
 install: $(VENV)
 
-upgrade: $(REQS)
+.PHONY: upgrade
+upgrade: | $(VENV)
 	@$(PIP) install --upgrade pip
 	@$(PIP) install --upgrade -r $(REQS)
 	@$(GALAXY) install --force -r $(DEPS)
 
+.PHONY: clean
 clean:
-	@rm -rf $(VENV) $(REQS)
+	@rm -rf $(VENV) $(REQS) $(DEPS)
 
-dist-clean: clean
+.PHONY: dist-clean mrproper
+dist-clean mrproper: clean
 	@rm -rf build/ dist/
 
-# --- Ansible/Build targets ----------------------------------------------------
+# --- Ansible/Build targets ---------------------------------------------------
 .PHONY: $(distributions) all docker limit
 
 $(distributions): | $(VENV)
@@ -98,13 +124,13 @@ $(distributions): | $(VENV)
 
 all: $(distributions)
 
-docker: $(VENV)
+docker: | $(VENV)
 	@$(PLAYBOOK) playbooks/docker.yml
 
-limit: $(VENV)
+limit: | $(VENV)
 	@$(PLAYBOOK) playbooks/build.yml --limit=$(LIMIT)
 
-# --- git targets --------------------------------------------------------------
+# --- git targets -------------------------------------------------------------
 
 # checkout the dev branch
 .PHONY: checkout-dev
@@ -136,7 +162,6 @@ prepare-release:
 	@git checkout main
 	@git pull --ff-only origin main
 	@git merge --ff-only dev
-	@git push origin main
 	@git checkout dev
 
 # bump the version number and update the changelog
@@ -144,8 +169,8 @@ prepare-release:
 version:
 	@git checkout main
 	@git pull --ff-only origin main
-	@semantic-release version
-	@git push origin main
+	@$(PSR) version
+	@git push origin main --follow-tags
 	@git checkout dev
 	@git pull --ff-only origin dev
 	@git merge --ff-only main
@@ -155,8 +180,9 @@ version:
 .PHONY: publish
 publish:
 	@git checkout main
-	@semantic-release publish
-	@git push origin main --tags
+	@git pull --ff-only origin main
+	@$(PSR) publish
+	@git push origin main --follow-tags
 	@git checkout dev
 
 # merge dev to main and create a new release, push changes to both branches
@@ -165,8 +191,8 @@ release:
 	@git checkout main
 	@git pull --ff-only origin main
 	@git merge --ff-only dev
-	@semantic-release version
-	@git push origin main --tags
+	@$(PSR) version
+	@git push origin main --follow-tags
 	@git checkout dev
 	@git pull --ff-only origin dev
 	@git merge --ff-only main

@@ -3,7 +3,7 @@
 ![GitHub](https://img.shields.io/github/license/jomrr/ansible-molecule-images) ![GitHub last commit](https://img.shields.io/github/last-commit/jomrr/ansible-molecule-images) ![GitHub issues](https://img.shields.io/github/issues-raw/jomrr/ansible-molecule-images)
 
 This repository contains a Makefile, Ansible inventory and playbook for building
-Docker images running an init system for use in Ansible Molecule tests.
+container images running an init system for use in Ansible Molecule tests.
 
 > This is the successor of the buildah scripts from [buildah-molecule-images](https://github.com/jomrr/buildah-molecule-images).
 
@@ -33,7 +33,9 @@ export DOCKER_SECRET=$(keyring get docker secret)
 # nvim containers.yml
 make install
 
-make <all|almalinux|alpine|amazonlinux|archlinux|debian|fedora|opensuse|oralcelinux|ubuntu>
+make all
+# or:
+make <almalinux|alpine|amazonlinux|archlinux|debian|fedora|opensuse|oraclelinux|ubuntu>
 
 # to upgrade the virtualenv packages and ansible-galaxy dependencies run:
 make upgrade
@@ -41,7 +43,14 @@ make upgrade
 
 ## Description
 
-The playbook [`playbooks/build.yml`](playbooks/build.yml) utilizes the `ansible.builtin.template` module to render Dockerfiles to the directory `build/{{ inventory_hostname }}/Dockerfile` and then uses the `containers.podman.podman_image` module to build and push the images to the configured registries from the inventory file [`containers.yml`](containers.yml). In this file the registries and its credentials are listed as `list of dictionaries` under the key `push_registries`. The name of the built image is configured in `build_image` as host_var, the tags in `build_tags`, also as host_vars.
+The playbook [`playbooks/build.yml`](playbooks/build.yml) uses the `ansible.builtin.template`
+module to render Dockerfiles to `build/{{ inventory_hostname }}/Dockerfile` and then uses
+the `containers.podman.podman_image` module to build and push the images to the registries
+configured in [`containers.yml`](containers.yml).
+
+In this file, registries and their credentials are defined as a list of dictionaries under
+the key `push_registries`. The name of the built image is configured via the host variable
+`build_image`, and the tags are configured via the host variable `build_tags`.
 
 ## Inventory variables in [`containers.yml`](containers.yml)
 
@@ -51,11 +60,11 @@ Any of these variables can be set at all, group or host level, where host level 
 | -------- | ----- | ---- | ------- | ----------- |
 | ansible_connection | all | str | local | defines ansible_connection=local for all inventory hosts |
 | build_image | group | str | None | name/repo of the built image, the namespace is used from `push_registries.item.username` |
-| build_maintainer | all | str | Jonas Mauer <<jam@kabelmail.net>> | build maintainer used in `MAINTAINER` and `ENV maintainer=` statement in generated Dockerfiles |
+| build_maintainer | all | str | Jonas Mauer <<jam@kabelmail.net>> | build maintainer metadata used in OCI labels in generated Dockerfiles |
 | build_tags | host | list=str | None | tags for the built images, the first listed tag will be used in FROM statement in Dockerfile, so e.g. `[39, latest]` will use tag `39` to build the image and push it tagged as `39` and `latest` |
 | container_image | group | str | None | name of the image to use in FROM statement in generated Dockerfile |
 | container_registry | all | str | docker.io | the container registry from where an image is pulled, used in FROM statement in generated Dockerfile |
-| push_registries | all | list=dict | [ { name: docker.io, username: "{{ lookup('ansible.builtin.env', 'DOCKER_USER') }}", password: "{{ lookup('ansible.builtin.env', 'DOCKER_USER') }}" } ] | list of registriy definitions as dictionaries to where the built images are pushed |
+| push_registries | all | list=dict | [ { name: docker.io, username: "{{ lookup('ansible.builtin.env', 'DOCKER_USER') }}", password: "{{ lookup('ansible.builtin.env', 'DOCKER_SECRET') }}" } ] | list of registry definitions as dictionaries to which the built images are pushed |
 
 ## Getting Started
 
@@ -67,7 +76,7 @@ The following prerequisites must be installed before using this playbook.
 
 #### System packages (Fedora)
 
-> The following packages need to be installed manually, adopt to your distribution as package names may vary:
+> The following packages need to be installed manually, adapt to your distribution as package names may vary:
 
 - `git`
 - `make`
@@ -77,15 +86,15 @@ The following prerequisites must be installed before using this playbook.
 
 #### Python (requirements.txt)
 
-The python prerquisites are installed in a virtualenv `.venv` via the Makefile with `make install`.
+The python prerequisites are installed in a virtualenv `.venv` via the Makefile with `make install`.
 
 - ansible >= 2.18
 
-To install it manually for your user without virtualenv run:
+To install it manually in the user environment without a virtualenv run:
 
 ```bash
 pip install --user --upgrade pip
-pip install --user --upgrade ansible >= 2.18
+pip install --user --upgrade 'ansible>=2.18'
 ```
 
 For development the following are also installed by `make install`:
@@ -121,7 +130,7 @@ roles: []
 it can be installed with:
 
 ```bash
-ansible-galaxy install -r requiremens.yml
+ansible-galaxy install -r requirements.yml
 ```
 
 ### Usage / Examples
@@ -136,7 +145,7 @@ make fedora debian
 
 #### Build and push images for `Fedora` and `Debian` in parallel
 
-This will make `make` run 2 jobs simultaniously, but mind the resource consumption:
+This will make `make` run 2 jobs simultaneously, but mind the resource consumption:
 
 ```bash
 make -j 2 fedora debian
