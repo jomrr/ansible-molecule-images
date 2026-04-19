@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v2.1.1 (2026-04-19)
+
+### Bug Fixes
+
+- **README**: Wrong inventory variables
+  ([`e0c459f`](https://github.com/jomrr/ansible-molecule-images/commit/e0c459f17c9fda70cfa782bf35a0273cc248aaee))
+
+
 ## v2.1.0 (2026-04-19)
 
 ### Build System
