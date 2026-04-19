@@ -4,160 +4,182 @@
 
 all:
   vars:
-    ansible_connection: local
+    ansible_connection: "local"
+    build_dir: "../build"
     build_maintainer: "Jonas Mauer <jam@kabelmail.net>"
-    container_registry: docker.io
+    build_no_log: true
+    pull_registry: "docker.io"
     push_registries:
-      - name: docker.io
+      - name: "docker.io"
         username: "{{ lookup('ansible.builtin.env', 'DOCKER_USER') }}"
         password: "{{ lookup('ansible.builtin.env', 'DOCKER_SECRET') }}"
   children:
     almalinux:
       hosts:
         almalinux-10:
-          build_tags:
+          push_tags:
             - "10"
             - "latest"
         almalinux-9:
-          build_tags:
+          push_tags:
             - "9"
       vars:
-        build_image: almalinux
-        container_image: almalinux
+        display_name: "AlmaLinux"
+        pull_image: "almalinux"
+        push_image: "almalinux"
+        push_repo: "molecule-almalinux"
     alpine:
       hosts:
         alpine-edge:
-          build_tags:
+          push_tags:
             - "edge"
         alpine-3.23:
-          build_tags:
+          push_tags:
             - "3.23"
             - "3"
             - "latest"
         alpine-3.22:
-          build_tags:
+          push_tags:
             - "3.22"
         alpine-3.21:
-          build_tags:
+          push_tags:
             - "3.21"
       vars:
-        build_image: alpine
-        container_image: alpine
+        display_name: "Alpine"
+        pull_image: "alpine"
+        push_image: "alpine"
+        push_repo: "molecule-alpine"
     amazonlinux:
       hosts:
         amazonlinux-2023:
-          build_tags:
+          push_tags:
             - "2023"
             - "latest"
       vars:
-        build_image: amazonlinux
-        container_image: amazonlinux
+        display_name: "Amazon Linux"
+        pull_image: "amazonlinux"
+        push_image: "amazonlinux"
+        push_repo: "molecule-amazonlinux"
     archlinux:
       hosts:
         archlinux-latest:
-          build_tags:
+          push_tags:
             - "latest"
       vars:
-        build_image: archlinux
-        container_image: archlinux
+        display_name: "Arch Linux"
+        pull_image: "archlinux"
+        push_image: "archlinux"
+        push_repo: "molecule-archlinux"
     debian:
       hosts:
         debian-13:
-          build_tags:
+          push_tags:
             - "trixie"
             - "13"
             - "latest"
             - "stable"
         debian-12:
-          build_tags:
+          push_tags:
             - "bookworm"
             - "12"
             - "oldstable"
         debian-11:
-          build_tags:
+          push_tags:
             - "bullseye"
             - "11"
             - "oldoldstable"
         debian-sid:
-          build_tags:
+          push_tags:
             - "sid"
             - "unstable"
         debian-testing:
-          build_tags:
+          push_tags:
             - "testing"
       vars:
-        build_image: debian
-        container_image: debian
+        display_name: "Debian"
+        pull_image: "debian"
+        push_image: "debian"
+        push_repo: "molecule-debian"
     fedora:
       hosts:
         fedora-44:
-          build_tags:
+          push_tags:
             - "44"
         fedora-43:
-          build_tags:
+          push_tags:
             - "43"
             - "latest"
         fedora-42:
-          build_tags:
+          push_tags:
             - "42"
             - "adams"
         fedora-rawhide:
-          build_tags:
+          push_tags:
             - "45"
             - "rawhide"
       vars:
-        build_image: fedora
-        container_image: fedora
+        display_name: "Fedora"
+        pull_image: "fedora"
+        push_image: "fedora"
+        push_repo: "molecule-fedora"
     opensuse:
       hosts:
         opensuse-leap-16:
-          build_tags:
+          push_tags:
             - "16.0"
             - "16"
             - "latest"
         opensuse-leap-15:
-          build_tags:
+          push_tags:
             - "15.6"
             - "15"
         opensuse-tumbleweed:
-          build_image: opensuse-tumbleweed
-          build_tags:
+          display_name: "OpenSUSE Tumbleweed"
+          pull_image: "opensuse/tumbleweed"
+          push_image: "opensuse-tumbleweed"
+          push_repo: "molecule-opensuse-tumbleweed"
+          push_tags:
             - "latest"
-          container_image: opensuse/tumbleweed
       vars:
-        build_image: opensuse-leap
-        container_image: opensuse/leap
+        display_name: "OpenSUSE Leap"
+        pull_image: "opensuse/leap"
+        push_image: "opensuse-leap"
+        push_repo: "molecule-opensuse-leap"
     oraclelinux:
       hosts:
         oraclelinux-10:
-          build_tags:
+          push_tags:
             - "10"
             - "latest"
         oraclelinux-9:
-          build_tags:
+          push_tags:
             - "9"
       vars:
-        build_image: oraclelinux
-        container_image: oraclelinux
+        display_name: "Oracle Linux"
+        pull_image: "oraclelinux"
+        push_image: "oraclelinux"
+        push_repo: "molecule-oraclelinux"
     ubuntu:
       hosts:
         ubuntu-26.04:
-          build_tags:
+          push_tags:
             - "26.04"
             - "resolute"
         ubuntu-24.04:
-          build_tags:
+          push_tags:
             - "24.04"
             - "noble"
             - "latest"
         ubuntu-22.04:
-          build_tags:
+          push_tags:
             - "22.04"
             - "jammy"
         ubuntu-20.04:
-          build_tags:
+          push_tags:
             - "20.04"
             - "focal"
       vars:
-        build_image: ubuntu
-        container_image: ubuntu
+        display_name: "Ubuntu"
+        pull_image: "ubuntu"
+        push_image: "ubuntu"
+        push_repo: "molecule-ubuntu"

@@ -1,0 +1,113 @@
+---
+# repo: jomrr/ansible-molecule-images
+# file: playbooks/dockerhub.yml
+
+- name: "PLAYBOOK | Manage dockerhub repositories"
+  hosts: localhost
+  gather_facts: false
+  vars:
+    dockerhub_namespace: "{{ lookup('ansible.builtin.env', 'DOCKER_USER') }}"
+    dockerhub_groups: >-
+      {{
+        dockerhub_filter
+        | default(
+            groups.keys()
+            | difference(['all', 'ungrouped', 'localhost'])
+            | list
+            | sort
+          )
+      }}
+  tasks:
+    - name: "Generate flat host list for filtered groups"
+      ansible.builtin.set_fact:
+        _host_entries: >-
+          {{
+            dockerhub_groups
+            | map('extract', groups)
+            | flatten
+            | unique
+            | list
+            | sort
+          }}
+
+    - name: "Generate repository list for dockerhub"
+      ansible.builtin.set_fact:
+        _repos: >-
+          {%- set ns = namespace(items=[]) -%}
+          {%- for host in _host_entries -%}
+            {%- set entry = {
+              'display_name': hostvars[host].display_name,
+              'pull_image': hostvars[host].pull_image,
+              'repo': hostvars[host].push_repo,
+              'slug': hostvars[host].push_image
+            } -%}
+            {%- if entry not in ns.items -%}
+              {%- set _ = ns.items.append(entry) -%}
+            {%- endif -%}
+          {%- endfor -%}
+          {{ ns.items }}
+
+    # - name: "Fetch docker repos"  # noqa: run-once
+    #   no_log: false
+    #   run_once: true
+    #   ansible.builtin.uri:
+    #     url: "https://registry.hub.docker.com/v2/repositories/{{ item.username }}"
+    #     method: GET
+    #     user: "{{ item.username }}"
+    #     password: "{{ item.password }}"
+    #   loop: "{{ push_registries }}"
+    #   register: _docker_repos
+    #   when: item.name == 'docker.io'
+
+    - name: "Create build directory"
+      ansible.builtin.file:
+        path: "{{ build_dir }}/{{ item }}"
+        state: directory
+        mode: '0755'
+      loop: "{{ _repos | map(attribute='slug') | list }}"
+
+    - name: "Render dockerhub description"
+      ansible.builtin.template:
+        src: "templates/dockerhub/description.txt.j2"
+        dest: "{{ build_dir }}/{{ item.slug }}/description.txt"
+        mode: "0644"
+      loop: "{{ _repos }}"
+
+    - name: "Render dockerhub full_description"
+      ansible.builtin.template:
+        src: "templates/dockerhub/full_description.md.j2"
+        dest: "{{ build_dir }}/{{ item.slug }}/full_description.md"
+        mode: "0644"
+      loop: "{{ _repos }}"
+
+    - name: "Authenticate to Docker Hub"
+      no_log: true
+      ansible.builtin.uri:
+        url: "https://hub.docker.com/v2/auth/token"
+        method: POST
+        body_format: json
+        body:
+          identifier: "{{ dockerhub_namespace }}"
+          secret: "{{ lookup('ansible.builtin.env', 'DOCKER_SECRET') }}"
+        headers:
+          Content-Type: "application/json"
+        return_content: true
+        status_code: 200
+      register: _dockerhub_auth
+
+    - name: "Update Docker Hub repository metadata"
+      ansible.builtin.uri:
+        url: "https://hub.docker.com/v2/repositories/{{ dockerhub_namespace }}/{{ item.repo }}/"
+        method: PATCH
+        body_format: json
+        body:
+          description: "{{ lookup('ansible.builtin.file', build_dir ~ '/' ~ item.slug ~ '/description.txt') | trim }}"
+          full_description: "{{ lookup('ansible.builtin.file', build_dir ~ '/' ~ item.slug ~ '/full_description.md') }}"
+        headers:
+          Authorization: "Bearer {{ _dockerhub_auth.json.access_token }}"
+          Content-Type: "application/json"
+        status_code: 200
+        return_content: true
+      loop: "{{ _repos }}"
+      loop_control:
+        label: "{{ item.repo }}"

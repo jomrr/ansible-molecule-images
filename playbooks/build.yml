@@ -1,10 +1,7 @@
 ---
-- name: "Generate Dockerfiles and build container images"
-  hosts: "{{ target | default('all') }}"
+- name: "PLAYBOOK | Generate Dockerfiles and build container images"
+  hosts: all
   gather_facts: true
-  vars:
-    build_dir: "../build"
-    ami_no_log: true
   tasks:
     - name: "Import variable files"
       ansible.builtin.include_vars:
@@ -13,44 +10,44 @@
         params:
           files:
             - "{{ inventory_hostname }}.yml"
-            - "{{ build_image }}.yml"
+            - "{{ push_image }}.yml"
           paths:
             - 'vars'
           skip: false
 
     - name: "Create build directory"
       ansible.builtin.file:
-        path: "{{ build_dir }}/{{ build_image }}"
+        path: "{{ build_dir }}/{{ push_image }}"
         state: directory
         mode: '0755'
 
     - name: "Generate Dockerfile"
       ansible.builtin.template:
-        src: Dockerfile.j2
-        dest: "{{ build_dir }}/{{ build_image }}/{{ inventory_hostname }}"
+        src: "templates/Dockerfile.j2"
+        dest: "{{ build_dir }}/{{ push_image }}/{{ inventory_hostname }}"
         mode: '0644'
 
     - name: "Generate image list per registry"
-      no_log: "{{ ami_no_log }}"
+      no_log: "{{ build_no_log }}"
       ansible.builtin.set_fact:
-        _images: "{{ _images | default([]) + [{'tag': tag, 'image': build_image} | combine(push_registries)] }}"
-      loop: "{{ build_tags }}"
+        _images: "{{ _images | default([]) + [{'tag': tag, 'image': push_image} | combine(push_registries)] }}"
+      loop: "{{ push_tags }}"
       loop_control:
         loop_var: tag
       vars:
         _images: []
 
     - name: "Build container images and push to registries"
-      no_log: "{{ ami_no_log }}"
+      no_log: "{{ build_no_log }}"
       containers.podman.podman_image:
         name: "{{ item.name }}/{{ item.username }}/molecule-{{ item.image }}"
         build:
-          file: "{{ build_dir }}/{{ build_image }}/{{ inventory_hostname }}"
+          file: "{{ build_dir }}/{{ push_image }}/{{ inventory_hostname }}"
           force_rm: true
           format: docker
           extra_args: "--network pasta:--ipv4-only"
         force: true
-        path: "{{ build_dir }}/{{ build_image }}"
+        path: "{{ build_dir }}/{{ push_image }}"
         state: build
         tag: "{{ item.tag }}"
         push: true

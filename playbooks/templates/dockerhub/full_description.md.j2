@@ -1,0 +1,115 @@
+{%- set generic_tags = ['latest', 'stable', 'oldstable', 'oldoldstable', 'testing', 'rawhide', 'edge'] -%}
+{%- set image_ref = dockerhub_namespace ~ '/' ~ item.repo -%}
+
+{%- if '/' in item.pull_image -%}
+{%-   set source_url = 'https://hub.docker.com/r/' ~ item.pull_image -%}
+{%- else -%}
+{%-   set source_url = 'https://hub.docker.com/_/' ~ item.pull_image -%}
+{%- endif %}
+
+{%- set repo = namespace(repo_variants=[], all_tags=[], rows=[]) -%}
+{%- for host in groups['all'] | sort -%}
+{%-   if hostvars[host].push_repo is defined and hostvars[host].push_repo == item.repo -%}
+{%-     set tags = hostvars[host].push_tags | default([]) -%}
+{%-     set repo.repo_variants = repo.repo_variants + [tags] -%}
+{%-     set repo.all_tags = repo.all_tags + tags -%}
+{%-   endif -%}
+{%- endfor -%}
+
+{%- if 'stable' in repo.all_tags -%}
+{%-   set example_tag = 'stable' -%}
+{%- elif 'latest' in repo.all_tags -%}
+{%-   set example_tag = 'latest' -%}
+{%- else -%}
+{%-   set example_tag = repo.repo_variants[0][0] if repo.repo_variants | length > 0 and repo.repo_variants[0] | length > 0 else '' -%}
+{%- endif -%}
+
+{%- if item.slug == 'alpine' -%}
+{%-   set init_system = 'openrc' -%}
+{%- else -%}
+{%-   set init_system = 'systemd' -%}
+{%- endif -%}
+
+# Ansible Molecule Images for {{ item.display_name }}
+
+This repository contains Ansible [Molecule](https://docs.ansible.com/projects/molecule/) images
+for {{ item.display_name }}.
+
+## Images
+
+The images in this repository are based on [{{ item.pull_image }}]({{ source_url }})
+and include `{{ init_system }}` and Python and the according package manager and libraries,
+making them suitable for testing Ansible roles with [Molecule](https://docs.ansible.com/projects/molecule/).
+
+## {{ item.display_name }} Versions
+
+The repository provides images for the following {{ item.display_name }} variants:
+
+{% for tags in repo.repo_variants -%}
+{%   set numeric_tags = tags | select('match', '^[0-9]+(\\.[0-9]+)?$') | list %}
+{%   set version_tag = numeric_tags[0] if numeric_tags else '' %}
+{%   set codename_candidates = tags | reject('in', generic_tags) | reject('match', '^[0-9]+(\\.[0-9]+)?$') | list %}
+{%   set codename_tag = codename_candidates[0] if codename_candidates else '' %}
+{%   if 'testing' in tags %}
+{%     set version_label = item.display_name ~ ' Testing' %}
+{%   elif 'sid' in tags and 'unstable' in tags %}
+{%     set version_label = item.display_name ~ ' Sid (Unstable)' %}
+{%   elif 'rawhide' in tags %}
+{%     set version_label = item.display_name ~ ' Rawhide' %}
+{%   elif 'edge' in tags %}
+{%     set version_label = item.display_name ~ ' Edge' %}
+{%   elif version_tag and codename_tag %}
+{%     set version_label = item.display_name ~ ' ' ~ version_tag ~ ' (' ~ (codename_tag | title) ~ ')' %}
+{%   elif version_tag %}
+{%     set version_label = item.display_name ~ ' ' ~ version_tag %}
+{%   elif codename_tag %}
+{%     set version_label = item.display_name ~ ' ' ~ (codename_tag | title) %}
+{%   else %}
+{%     set version_label = item.display_name %}
+{%   endif %}
+{%   set _ = repo.rows.append('| ' ~ version_label ~ ' | ' ~ image_ref ~ ' | ' ~ (tags | join(', ')) ~ ' |') %}
+{% endfor %}
+| Version | Image | Tags |
+| ------- | ----- | ---- |
+{{ repo.rows | join('\n') }}
+
+## Usage
+
+To use these images in [Molecule](https://docs.ansible.com/projects/molecule/),
+reference them in your `molecule.yml`.
+
+### Molecule `docker` driver
+
+To use the {{ item.display_name }} {{ example_tag }} image with the docker driver:
+
+```yaml
+platforms:
+  - name: instance
+    image: "{{ image_ref }}:{{ example_tag }}"
+    privileged: true
+```
+
+### Molecule `podman` driver
+
+To use the {{ item.display_name }} {{ example_tag }} image with the podman driver:
+
+```yaml
+platforms:
+  - name: instance
+    image: "docker.io/{{ image_ref }}:{{ example_tag }}"
+```
+
+This will start a container with {{ item.display_name }} {{ example_tag }} and `{{ init_system }}` as `pid 0`,
+which you can then use for testing your Ansible roles.
+
+## License
+
+These images are released under the MIT License.
+
+## Author
+
+Created and maintained by [Jonas Mauer](https://github.com/jomrr).
+
+## Source
+
+Source repository: [github.com/jomrr/ansible-molecule-images](https://github.com/jomrr/ansible-molecule-images)

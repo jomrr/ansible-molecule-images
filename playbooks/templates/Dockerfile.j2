@@ -1,4 +1,4 @@
-FROM {{ dockerfile.from }}:{{ build_tags[0] }}
+FROM {{ dockerfile.from }}:{{ push_tags[0] }}
 
 # Set maintainer
 LABEL maintainer="{{ build_maintainer }}"

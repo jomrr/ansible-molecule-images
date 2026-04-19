@@ -3,7 +3,7 @@
 # file: playbooks/vars/amazonlinux.yml
 
 dockerfile:
-  from: "{{ container_registry }}/{{ container_image }}"
+  from: "{{ pull_registry }}/{{ pull_image }}"
   entrypoint: "/usr/lib/systemd/systemd"
   environment:
     container: docker

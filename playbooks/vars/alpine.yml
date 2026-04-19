@@ -3,7 +3,7 @@
 # file: playbooks/vars/alpine.yml
 
 dockerfile:
-  from: "{{ container_registry }}/{{ container_image }}"
+  from: "{{ pull_registry }}/{{ pull_image }}"
   entrypoint: "/sbin/init"
   environment:
     container: docker

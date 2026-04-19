@@ -79,28 +79,23 @@ help:
 	@echo "  $(distributions)"
 
 $(DEPS):
-	@echo "---" > $@
-	@echo "collections:" >> $@
-	@echo "  - containers.podman" >> $@
-	@echo "" >> $@
+	@$(GALAXY) install -r $(DEPS)
 
 $(REQS):
-	@echo "ansible" > $@
-	@echo "commitizen" >> $@
-	@echo "pre-commit" >> $@
-	@echo "python-semantic-release" >> $@
-
-$(VENV): $(REQS) $(DEPS)
-	@python3 -m venv $(VENV)
 	@$(PIP) install --upgrade pip
 	@$(PIP) install -r requirements.txt
-	@$(GALAXY) install -r $(DEPS)
+
+$(VENV):
+	@python3 -m venv $(VENV)
+
+$(PLAYBOOK): $(REQS) $(DEPS) | $(VENV)
 	@$(PRE_COMMIT) install --hook-type commit-msg
+	@touch $@
 
 # --- General make targets ----------------------------------------------------
 
 .PHONY: install
-install: $(VENV)
+install: | $(PLAYBOOK)
 
 .PHONY: upgrade
 upgrade: | $(VENV)
@@ -124,8 +119,8 @@ $(distributions): | $(VENV)
 
 all: $(distributions)
 
-docker: | $(VENV)
-	@$(PLAYBOOK) playbooks/docker.yml
+dockerhub: | $(PLAYBOOK)
+	@$(PLAYBOOK) playbooks/dockerhub.yml
 
 limit: | $(VENV)
 	@$(PLAYBOOK) playbooks/build.yml --limit=$(LIMIT)

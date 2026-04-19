@@ -3,7 +3,7 @@
 # file: playbooks/vars/ubuntu.yml
 
 dockerfile:
-  from: "{{ container_registry }}/{{ container_image }}"
+  from: "{{ pull_registry }}/{{ pull_image }}"
   entrypoint: "/lib/systemd/systemd"
   environment:
     container: docker
