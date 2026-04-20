@@ -18,6 +18,7 @@ PIP			:= $(VENV)/bin/pip
 PRE_COMMIT		:= $(VENV)/bin/pre-commit
 PSR			:= $(VENV)/bin/semantic-release
 # --- Ansible ------------------------------------------------------------------
+ANSIBLE			:= .ansible
 GALAXY			:= $(VENV)/bin/ansible-galaxy
 PLAYBOOK		:= $(VENV)/bin/ansible-playbook
 # --- Makefile -----------------------------------------------------------------
@@ -50,7 +51,7 @@ help:
 	@echo "  help                  Show this help"
 	@echo "  install               Create python virtual environment and install all dependencies"
 	@echo "  upgrade               Upgrade python and ansible dependencies in the virtual environment"
-	@echo "  clean                 Remove the virtual environment"
+	@echo "  clean                 Remove ansible environment and virtual environment"
 	@echo "  dist-clean            Remove the virtual environment and build artifacts"
 	@echo "  mrproper              Alias for dist-clean"
 	@echo
@@ -110,7 +111,7 @@ prune-all:
 
 .PHONY: clean
 clean:
-	@rm -rf $(VENV)
+	@rm -rf $(ANSIBLE) $(VENV)
 
 .PHONY: dist-clean mrproper
 dist-clean mrproper: clean
@@ -153,6 +154,7 @@ start-feature:
 merge-feature-to-dev:
 	@test -n "$(FEATURE)" || { echo "FEATURE is required"; exit 1; }
 	@git checkout dev
+	@git pull --ff-only origin dev
 	@git merge $(FEATURE)
 	@git branch -d $(FEATURE)
 
