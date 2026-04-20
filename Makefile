@@ -173,8 +173,6 @@ prepare-release: checkout-dev
 # merge dev to main and create a new release, push changes to both branches
 .PHONY: release
 release: checkout-main | $(PSR)
-	@git fetch origin dev
-	@git merge --ff-only origin/dev
 	@$(PSR) version
 	@git push origin main --follow-tags
 	@git checkout dev
