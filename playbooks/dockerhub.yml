@@ -6,7 +6,7 @@
   hosts: localhost
   gather_facts: false
   vars:
-    dockerhub_namespace: "{{ lookup('ansible.builtin.env', 'DOCKER_USER') }}"
+    dockerhub_apply: true
     dockerhub_groups: >-
       {{
         dockerhub_filter
@@ -17,6 +17,7 @@
             | sort
           )
       }}
+    dockerhub_namespace: "{{ lookup('ansible.builtin.env', 'DOCKER_USER') }}"
   tasks:
     - name: "Generate flat host list for filtered groups"
       ansible.builtin.set_fact:
@@ -94,6 +95,7 @@
         return_content: true
         status_code: 200
       register: _dockerhub_auth
+      when: dockerhub_apply | bool
 
     - name: "Update Docker Hub repository metadata"
       ansible.builtin.uri:
@@ -111,3 +113,4 @@
       loop: "{{ _repos }}"
       loop_control:
         label: "{{ item.repo }}"
+      when: dockerhub_apply | bool

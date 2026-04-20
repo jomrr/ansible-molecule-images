@@ -1,0 +1,14 @@
+---
+# repo: jomrr/ansible-molecule-images
+# file: playbooks/prune.yml
+
+- name: "PLAYBOOK | Prune podman images"
+  hosts: all
+  gather_facts: false
+  strategy: linear
+  tasks:
+    - name: "Prune dangling images"
+      containers.podman.podman_prune:
+        image: true
+        image_filters:
+          dangling_only: true

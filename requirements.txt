@@ -1,0 +1,7 @@
+# repo: jomrr/ansible-molecule-images
+# file: requirements.txt
+
+ansible
+commitizen
+pre-commit
+python-semantic-release

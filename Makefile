@@ -103,25 +103,32 @@ upgrade: | $(VENV)
 	@$(PIP) install --upgrade -r $(REQS)
 	@$(GALAXY) install --force -r $(DEPS)
 
+.PHONY: prune
+prune:
+	@$(PLAYBOOK) playbooks/$@.yml
+
 .PHONY: clean
-clean:
-	@rm -rf $(VENV) $(REQS) $(DEPS)
+clean:	prune
+	@rm -rf $(VENV)
 
 .PHONY: dist-clean mrproper
 dist-clean mrproper: clean
-	@rm -rf build/ dist/
+	@rm -rf build/
 
 # --- Ansible/Build targets ---------------------------------------------------
-.PHONY: $(distributions) all docker limit
 
+.PHONY: $(distributions)
 $(distributions): | $(VENV)
 	@$(PLAYBOOK) playbooks/build.yml --limit=$@
 
+.PHONY: all
 all: $(distributions)
 
+.PHONY: dockerhub
 dockerhub: | $(PLAYBOOK)
 	@$(PLAYBOOK) playbooks/dockerhub.yml
 
+.PHONY: limit
 limit: | $(VENV)
 	@$(PLAYBOOK) playbooks/build.yml --limit=$(LIMIT)
 

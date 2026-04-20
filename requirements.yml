@@ -1,0 +1,6 @@
+---
+# repo: jomrr/ansible-molecule-images
+# file: requirements.yml
+
+collections:
+  - containers.podman

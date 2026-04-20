@@ -1,4 +1,7 @@
 ---
+# repo: jomrr/ansible-molecule-images
+# file: playbooks/build.yml
+
 - name: "PLAYBOOK | Generate Dockerfiles and build container images"
   hosts: all
   gather_facts: false
@@ -27,108 +30,45 @@
         dest: "{{ build_dir }}/{{ push_image }}/{{ inventory_hostname }}"
         mode: '0644'
 
-    - name: "Generate tag/registry push matrix"
+    - name: "Generate tag/push matrix"
       no_log: "{{ build_no_log }}"
       ansible.builtin.set_fact:
-        _images: "{{ _images | default([]) + [{'tag': tag, 'image': push_image} | combine(push_registries)] }}"
-      loop: "{{ push_tags }}"
-      loop_control:
-        loop_var: tag
-        label: "{{ inventory_hostname }}:{{ tag }}"
+        _targets: "{{ (_targets | default([])) + [target_spec] }}"
       vars:
-        _images: []
+        registry: "{{ pair.0 }}"
+        push_tag: "{{ pair.1 }}"
+        target_spec:
+          registry: "{{ registry.name }}"
+          username: "{{ registry.username }}"
+          password: "{{ registry.password }}"
+          repo: "{{ push_repo }}"
+          image: "{{ push_image }}"
+          tag: "{{ push_tag }}"
+          path: "{{ build_dir }}/{{ push_image }}"
+          file: "{{ build_dir }}/{{ push_image }}/{{ inventory_hostname }}"
+          origin: "{{ registry.name }}/{{ registry.username }}/{{ push_repo }}"
+          target: "{{ registry.name }}/{{ registry.username }}/{{ push_repo }}:{{ push_tag }}"
+      loop: "{{ push_registries | product(push_tags) | list }}"
+      loop_control:
+        loop_var: pair
+        label: "{{ pair.0.name }}/{{ pair.0.username }}/{{ push_repo }}:{{ pair.1 }}"
 
     - name: "Build container images and push to registries"
       no_log: "{{ build_no_log }}"
       containers.podman.podman_image:
-        name: "{{ item.name }}/{{ item.username }}/molecule-{{ item.image }}"
+        name: "{{ item.origin }}"
         build:
-          file: "{{ build_dir }}/{{ push_image }}/{{ inventory_hostname }}"
+          file: "{{ item.file }}"
           force_rm: true
           format: docker
-          extra_args: "--network pasta:--ipv4-only"
         force: true
-        path: "{{ build_dir }}/{{ push_image }}"
+        path: "{{ item.path }}"
         state: build
         tag: "{{ item.tag }}"
         push: true
         username: "{{ item.username }}"
         password: "{{ item.password }}"
-      loop: "{{ _images }}"
+      loop: "{{ _targets }}"
       loop_control:
         loop_var: item
-        label: "{{ item.name }}/{{ item.username }}/molecule-{{ item.image }}:{{ item.tag }}"
-
-    # battering everything against podman_image and building every tag
-    # is faster than building once and then tagging and pushing separately?!?
-    # TODO: investigate
-
-    # - name: "Build container image for inventory item"
-    #   no_log: "{{ build_no_log }}"
-    #   containers.podman.podman_image:
-    #     name: "localhost/{{ hostvars[inventory_hostname].push_repo }}"
-    #     tag: "{{ inventory_hostname }}"
-    #     build:
-    #       file: "{{ build_dir }}/{{ hostvars[inventory_hostname].push_image }}/{{ inventory_hostname }}"
-    #       force_rm: true
-    #       format: docker
-    #       extra_args: "--network pasta:--ipv4-only"
-    #     force: true
-    #     path: "{{ build_dir }}/{{ hostvars[inventory_hostname].push_image }}"
-    #     state: build
-
-    # - name: "Generate tag/push matrix"
-    #   no_log: "{{ build_no_log }}"
-    #   ansible.builtin.set_fact:
-    #     _targets: "{{ (_targets | default([])) + [target_spec] }}"
-    #   vars:
-    #     registry: "{{ pair.0 }}"
-    #     push_tag: "{{ pair.1 }}"
-    #     target_spec:
-    #       registry: "{{ registry.name }}"
-    #       username: "{{ registry.username }}"
-    #       password: "{{ registry.password }}"
-    #       repo: "{{ push_repo }}"
-    #       image: "{{ push_image }}"
-    #       tag: "{{ push_tag }}"
-    #       target: "{{ registry.name }}/{{ registry.username }}/{{ push_repo }}:{{ push_tag }}"
-    #   loop: "{{ push_registries | product(push_tags) | list }}"
-    #   loop_control:
-    #     loop_var: pair
-    #     label: "{{ pair.0.name }}/{{ pair.0.username }}/{{ push_repo }}:{{ pair.1 }}"
-
-    # - name: "Tag local image for all targets"
-    #   no_log: "{{ build_no_log }}"
-    #   containers.podman.podman_tag:
-    #     image: "localhost/{{ build.repo }}:{{ inventory_hostname }}"
-    #     target_names:
-    #       - "{{ build.target }}"
-    #   loop: "{{ _targets }}"
-    #   loop_control:
-    #     loop_var: build
-    #     label: "{{ build.target }}"
-
-    # - name: "Push all tags to registries"
-    #   no_log: "{{ build_no_log }}"
-    #   containers.podman.podman_image:
-    #     name: "{{ push.registry }}/{{ push.username }}/{{ push.repo }}"
-    #     tag: "{{ push.tag }}"
-    #     push: true
-    #     username: "{{ push.username }}"
-    #     password: "{{ push.password }}"
-    #   loop: "{{ _targets }}"
-    #   loop_control:
-    #     loop_var: push
-    #     label: "{{ push.target }}"
-
-- name: "PLAYBOOK | Prune podman images"
-  hosts: all
-  gather_facts: false
-  strategy: linear
-  tasks:
-    - name: "Prune dangling images"
-      run_once: true
-      containers.podman.podman_prune:
-        image: true
-        image_filters:
-          dangling_only: true
+        label: "{{ item.target }}"

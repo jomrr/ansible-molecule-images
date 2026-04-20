@@ -1,4 +1,7 @@
 ---
+# repo: jomrr/ansible-molecule-images
+# file: .pre-commit-config.yaml
+
 repos:
   - repo: https://github.com/commitizen-tools/commitizen
     rev: v4.13.10

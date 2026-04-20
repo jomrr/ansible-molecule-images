@@ -1,3 +1,6 @@
+{#- repo: jomrr/ansible-molecule-images -#}
+{#- file: playbooks/templates/dockerhub/full_description.md.j2 -#}
+
 {%- set generic_tags = ['latest', 'stable', 'oldstable', 'oldoldstable', 'testing', 'rawhide', 'edge'] -%}
 {%- set image_ref = dockerhub_namespace ~ '/' ~ item.repo -%}
 

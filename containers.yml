@@ -1,5 +1,5 @@
 ---
-# name: ansible-molecule-images
+# repo: jomrr/ansible-molecule-images
 # file: containers.yml
 
 all:

@@ -1,3 +1,6 @@
+# repo: jomrr/ansible-molecule-images
+# file: playbooks/templates/Dockerfile.j2
+
 FROM {{ dockerfile.from }}:{{ push_tags[0] }}
 
 # Set maintainer

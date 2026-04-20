@@ -6,8 +6,6 @@ dist/
 # Dependencies -----------------------------------------------------------------
 collections/
 roles/
-requirements.txt
-requirements.yml
 # IDE files and directories ----------------------------------------------------
 .idea/
 .vscode/
