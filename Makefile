@@ -109,7 +109,7 @@ prune:
 	@$(PLAYBOOK) playbooks/$@.yml
 
 .PHONY: clean
-clean:	prune
+clean:
 	@rm -rf $(VENV)
 
 .PHONY: dist-clean mrproper
