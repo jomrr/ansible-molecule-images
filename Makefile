@@ -19,7 +19,6 @@ PRE_COMMIT		:= $(VENV)/bin/pre-commit
 PSR			:= $(VENV)/bin/semantic-release
 # --- Ansible ------------------------------------------------------------------
 GALAXY			:= $(VENV)/bin/ansible-galaxy
-INVENTORY 		:= $(VENV)/bin/ansible-inventory --list --limit
 PLAYBOOK		:= $(VENV)/bin/ansible-playbook
 # --- Makefile -----------------------------------------------------------------
 # no autocomplete for dynamic targets ... :(
@@ -145,13 +144,13 @@ commit:
 # start a new feature branch
 .PHONY: start-feature
 start-feature:
-	@test -n "$(FEATURE)"
+	@test -n "$(FEATURE)" || { echo "FEATURE is required"; exit 1; }
 	@git checkout -b $(FEATURE) dev
 
 # merge a feature branch to dev
 .PHONY: merge-feature-to-dev
 merge-feature-to-dev:
-	@test -n "$(FEATURE)"
+	@test -n "$(FEATURE)" || { echo "FEATURE is required"; exit 1; }
 	@git checkout dev
 	@git merge $(FEATURE)
 	@git branch -d $(FEATURE)
