@@ -38,37 +38,49 @@
         registry: "{{ pair.0 }}"
         push_tag: "{{ pair.1 }}"
         target_spec:
-          registry: "{{ registry.name }}"
           username: "{{ registry.username }}"
           password: "{{ registry.password }}"
-          repo: "{{ push_repo }}"
-          image: "{{ push_image }}"
-          tag: "{{ push_tag }}"
-          path: "{{ build_dir }}/{{ push_image }}"
-          file: "{{ build_dir }}/{{ push_image }}/{{ inventory_hostname }}"
-          origin: "{{ registry.name }}/{{ registry.username }}/{{ push_repo }}"
           target: "{{ registry.name }}/{{ registry.username }}/{{ push_repo }}:{{ push_tag }}"
+          origin: "{{ registry.name }}/{{ registry.username }}/{{ push_repo }}"
+          tag: "{{ push_tag }}"
       loop: "{{ push_registries | product(push_tags) | list }}"
       loop_control:
         loop_var: pair
         label: "{{ pair.0.name }}/{{ pair.0.username }}/{{ push_repo }}:{{ pair.1 }}"
 
-    - name: "Build container images and push to registries"
+    - name: "Build local image once per variant"
       no_log: "{{ build_no_log }}"
       containers.podman.podman_image:
-        name: "{{ item.origin }}"
+        name: "localhost/{{ push_repo }}"
+        tag: "{{ inventory_hostname }}"
+        path: "{{ build_dir }}/{{ push_image }}"
+        state: build
         build:
-          file: "{{ item.file }}"
+          cache: true
+          file: "{{ build_dir }}/{{ push_image }}/{{ inventory_hostname }}"
           force_rm: true
           format: docker
+          extra_args: >-
+            --layers
+            --source-date-epoch={{ lookup('pipe', 'git log -1 --pretty=%ct') }}
+            --rewrite-timestamp
         force: true
-        path: "{{ item.path }}"
-        state: build
-        tag: "{{ item.tag }}"
+
+    - name: "Tag local image for all targets"
+      no_log: "{{ build_no_log }}"
+      containers.podman.podman_tag:
+        image: "localhost/{{ push_repo }}:{{ inventory_hostname }}"
+        target_names: "{{ _targets | map(attribute='target') | unique | list }}"
+
+    - name: "Push all tags to registries"
+      no_log: "{{ build_no_log }}"
+      containers.podman.podman_image:
+        name: "{{ push.origin }}"
+        tag: "{{ push.tag }}"
         push: true
-        username: "{{ item.username }}"
-        password: "{{ item.password }}"
+        username: "{{ push.username }}"
+        password: "{{ push.password }}"
       loop: "{{ _targets }}"
       loop_control:
-        loop_var: item
-        label: "{{ item.target }}"
+        loop_var: push
+        label: "{{ push.target }}"
