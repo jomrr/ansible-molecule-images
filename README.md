@@ -82,7 +82,7 @@ The following prerequisites must be installed before using this playbook.
 > The following packages need to be installed manually, adapt to your distribution as package names may vary:
 
 - `git`
-- `make`
+- `make` >= 4.3
 - `python3` >= 3.12
 - `python3-pip`
 - `python3-virtualenv`

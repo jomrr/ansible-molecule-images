@@ -20,10 +20,11 @@ PSR			:= $(VENV)/bin/semantic-release
 # --- Ansible ------------------------------------------------------------------
 ANSIBLE			:= .ansible
 ANSIBLE_CFG		:= $(CURDIR)/ansible.cfg
-ANSIBLE_ROLES		:= $(CURDIR)/$(ANSIBLE)/roles
 ANSIBLE_COLLECTIONS	:= $(CURDIR)/$(ANSIBLE)/collections
 GALAXY			:= $(VENV)/bin/ansible-galaxy
+GALAXY_COLL_INSTALL	:= $(GALAXY) collection install --collections-path $(ANSIBLE_COLLECTIONS)
 PLAYBOOK		:= $(VENV)/bin/ansible-playbook
+export ANSIBLE_CONFIG	:= $(ANSIBLE_CFG)
 # --- Makefile -----------------------------------------------------------------
 # no autocomplete for dynamic targets ... :(
 #distributions		:= $(shell $(INVENTORY) | jq -r 'keys[] | \
@@ -52,7 +53,8 @@ help:
 	@echo
 	@echo "Targets:"
 	@echo "  help                  Show this help"
-	@echo "  install               Create python virtual environment and install all dependencies"
+	@echo "  install               Create python virtual environment and install all dependencies,"
+	@echo "                        must run once after fresh clone or after dist-clean/mrproper"
 	@echo "  upgrade               Upgrade python and ansible dependencies in the virtual environment"
 	@echo "  clean                 Remove ansible environment and virtual environment"
 	@echo "  dist-clean            Remove the virtual environment and build artifacts"
@@ -66,15 +68,13 @@ help:
 	@echo "  prune-all             Prune all local podman images"
 	@echo
 	@echo "Git workflow:"
-	@echo "  checkout-dev          Switch to the dev branch"
-	@echo "  commit                Stage all changes and create a commit"
+	@echo "  checkout-dev          Switch to the dev branch and pull the latest changes"
+	@echo "  checkout-main         Switch to the main branch and pull the latest changes"
 	@echo "  start-feature         Create a new feature branch from dev (requires FEATURE=...)"
 	@echo "  merge-feature-to-dev  Merge FEATURE into dev and delete the feature branch"
 	@echo
 	@echo "Release workflow:"
-	@echo "  prepare-release       Push dev, fast-forward merge dev into main locally, then switch back to dev"
-	@echo "  version               Run semantic-release on main, then merge main back into dev"
-	@echo "  publish               Upload built distribution files to an existing release on main"
+	@echo "  prepare-release       Push dev, fast-forward merge dev into main and push to origin, then switch back to dev"
 	@echo "  release               Merge dev into main, run semantic-release, then merge main back into dev"
 	@echo
 	@echo "Supported distributions:"
@@ -83,25 +83,26 @@ help:
 $(PIP):
 	@python3 -m venv $(VENV)
 
-$(PLAYBOOK) $(GALAXY) $(PRE_COMMIT) $(PSR): $(REQ_TXT) | $(PIP)
+# grouped target for python dependencies ~= one recipe builds multiple targets
+$(PLAYBOOK) $(GALAXY) $(PRE_COMMIT) $(PSR) &: $(REQ_TXT) | $(PIP)
 	@$(PIP) install --upgrade pip
 	@$(PIP) install -r $(REQ_TXT)
 
 .PHONY: ansible-deps
 ansible-deps: $(REQ_YML) | $(GALAXY)
-	@$(GALAXY) install -r $(REQ_YML)
+	@$(GALAXY_COLL_INSTALL) -r $(REQ_YML)
 
 # --- General make targets ----------------------------------------------------
 
 .PHONY: install
-install: ansible-deps
+install: ansible-deps | $(PRE_COMMIT)
 	@$(PRE_COMMIT) install --hook-type commit-msg
 
 .PHONY: upgrade
 upgrade: $(REQ_TXT) $(REQ_YML) | $(PIP)
 	@$(PIP) install --upgrade pip
 	@$(PIP) install --upgrade -r $(REQ_TXT)
-	@$(GALAXY) install --force -r $(REQ_YML)
+	@$(GALAXY_COLL_INSTALL) --force -r $(REQ_YML)
 	@$(PRE_COMMIT) install --hook-type commit-msg
 
 .PHONY: prune
@@ -135,68 +136,51 @@ dockerhub: | $(PLAYBOOK)
 
 # --- git targets -------------------------------------------------------------
 
-# checkout the dev branch
-.PHONY: checkout-dev
-checkout-dev:
-	@git checkout dev
+.PHONY: check-clean-worktree
+check-clean-worktree:
+	@test -z "$$(git status --porcelain)" || { \
+		echo "Working tree is not clean"; \
+		git status --short; \
+		exit 1; \
+	}
 
-# commit changes to the current branch
-.PHONY: commit
-commit:
-	@git add .
-	@git commit
+# checkout branch and pull the latest changes
+.PHONY: checkout-dev checkout-main
+checkout-dev checkout-main: checkout-%: check-clean-worktree
+	@git checkout $*
+	@git pull --ff-only origin $*
+
+# check that FEATURE variable is set for feature branch targets
+.PHONY: require-feature
+require-feature:
+	@test -n "$(FEATURE)" || { echo "FEATURE is required"; exit 1; }
 
 # start a new feature branch
 .PHONY: start-feature
-start-feature:
-	@test -n "$(FEATURE)" || { echo "FEATURE is required"; exit 1; }
-	@git checkout -b $(FEATURE) dev
+start-feature: require-feature checkout-dev
+	@git checkout -b $(FEATURE)
 
 # merge a feature branch to dev
 .PHONY: merge-feature-to-dev
-merge-feature-to-dev:
-	@test -n "$(FEATURE)" || { echo "FEATURE is required"; exit 1; }
-	@git checkout dev
-	@git pull --ff-only origin dev
-	@git merge $(FEATURE)
+merge-feature-to-dev: require-feature checkout-dev
+	@git merge --ff-only $(FEATURE)
 	@git branch -d $(FEATURE)
 
 # prepare a release and merge dev to main
 .PHONY: prepare-release
-prepare-release:
+prepare-release: checkout-dev
 	@git push origin dev
 	@git checkout main
 	@git pull --ff-only origin main
 	@git merge --ff-only dev
-	@git checkout dev
-
-# bump the version number and update the changelog
-.PHONY: version
-version: | $(PSR)
-	@git checkout main
-	@git pull --ff-only origin main
-	@$(PSR) version
-	@git push origin main --follow-tags
-	@git checkout dev
-	@git pull --ff-only origin dev
-	@git merge --ff-only main
-	@git push origin dev
-
-# upload built distribution files to an existing release
-.PHONY: publish
-publish: | $(PSR)
-	@git checkout main
-	@git pull --ff-only origin main
-	@$(PSR) publish
-	@git push origin main --follow-tags
+	@git push origin main
 	@git checkout dev
 
 # merge dev to main and create a new release, push changes to both branches
 .PHONY: release
-release: | $(PSR)
-	@git checkout main
-	@git pull --ff-only origin main
-	@git merge --ff-only dev
+release: checkout-main | $(PSR)
+	@git fetch origin dev
+	@git merge --ff-only origin/dev
 	@$(PSR) version
 	@git push origin main --follow-tags
 	@git checkout dev
