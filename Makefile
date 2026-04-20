@@ -11,8 +11,8 @@ SHELL		:= /bin/bash
 .DEFAULT_GOAL	:= help
 
 # --- Python virtual environment -----------------------------------------------
-DEPS			:= requirements.yml
-REQS			:= requirements.txt
+REQ_TXT			:= requirements.txt
+REQ_YML			:= requirements.yml
 VENV			:= .venv
 PIP			:= $(VENV)/bin/pip
 PRE_COMMIT		:= $(VENV)/bin/pre-commit
@@ -22,7 +22,6 @@ GALAXY			:= $(VENV)/bin/ansible-galaxy
 INVENTORY 		:= $(VENV)/bin/ansible-inventory --list --limit
 PLAYBOOK		:= $(VENV)/bin/ansible-playbook
 # --- Makefile -----------------------------------------------------------------
-LIMIT			?= fedora
 # no autocomplete for dynamic targets ... :(
 #distributions		:= $(shell $(INVENTORY) | jq -r 'keys[] | \
 #	select(. != "_meta" and . != "all") | @sh' | tr -d "'" | tr '\n' ' ')
@@ -38,30 +37,29 @@ distributions	:= \
 	oraclelinux \
 	ubuntu
 
-# --- Python virtual environment and general make targets ----------------------
+# --- Help and Python virtual environment targets -----------------------------
 
 # default target
 .PHONY: help
 help:
-	@echo "Usage: make <target> [LIMIT=<hostname|group>] [FEATURE=<branch-name>]"
+	@echo "Usage: make <target> [FEATURE=<branch-name>]"
 	@echo
 	@echo "Environment:"
-	@echo "  LIMIT=<hostname|group>   Limit Ansible build targets (default: $(LIMIT))"
 	@echo "  FEATURE=<branch-name>    Feature branch name for start-feature / merge-feature-to-dev"
 	@echo
 	@echo "Targets:"
 	@echo "  help                  Show this help"
-	@echo "  install               Create the Python virtual environment and install dependencies"
-	@echo "  upgrade               Upgrade Python and Ansible dependencies in the virtual environment"
-	@echo "  clean                 Remove the virtual environment and generated dependency files"
+	@echo "  install               Create python virtual environment and install all dependencies"
+	@echo "  upgrade               Upgrade python and ansible dependencies in the virtual environment"
+	@echo "  clean                 Remove the virtual environment"
 	@echo "  dist-clean            Remove the virtual environment and build artifacts"
 	@echo "  mrproper              Alias for dist-clean"
 	@echo
 	@echo "Build:"
 	@echo "  all                   Build all supported distributions"
 	@echo "  <distro>              Build a specific distribution"
-	@echo "  docker                Update docker repository description"
-	@echo "  limit                 Build artifacts limited to LIMIT=<hostname|group>"
+	@echo "  dockerhub             Update docker repository description"
+	@echo "  prune                 Prune local podman images"
 	@echo
 	@echo "Git workflow:"
 	@echo "  checkout-dev          Switch to the dev branch"
@@ -78,35 +76,37 @@ help:
 	@echo "Supported distributions:"
 	@echo "  $(distributions)"
 
-$(DEPS):
-	@$(GALAXY) install -r $(DEPS)
-
-$(REQS):
-	@$(PIP) install --upgrade pip
-	@$(PIP) install -r requirements.txt
-
-$(VENV):
+$(PIP):
 	@python3 -m venv $(VENV)
 
-$(PLAYBOOK): $(REQS) $(DEPS) | $(VENV)
-	@$(PRE_COMMIT) install --hook-type commit-msg
-	@touch $@
+$(PLAYBOOK) $(GALAXY) $(PRE_COMMIT) $(PSR): $(REQ_TXT) | $(PIP)
+	@$(PIP) install --upgrade pip
+	@$(PIP) install -r $(REQ_TXT)
+
+.PHONY: ansible-deps
+ansible-deps: $(REQ_YML) | $(GALAXY)
+	@$(GALAXY) install -r $(REQ_YML)
 
 # --- General make targets ----------------------------------------------------
 
 .PHONY: install
-install: | $(PLAYBOOK)
+install: ansible-deps
+	@$(PRE_COMMIT) install --hook-type commit-msg
 
 .PHONY: upgrade
-upgrade: | $(VENV)
+upgrade: $(REQ_TXT) $(REQ_YML) | $(PIP)
 	@$(PIP) install --upgrade pip
-	@$(PIP) install --upgrade -r $(REQS)
-	@$(GALAXY) install --force -r $(DEPS)
+	@$(PIP) install --upgrade -r $(REQ_TXT)
+	@$(GALAXY) install --force -r $(REQ_YML)
 	@$(PRE_COMMIT) install --hook-type commit-msg
 
 .PHONY: prune
 prune:
-	@$(PLAYBOOK) playbooks/$@.yml
+	@podman image prune --force
+
+.PHONY: prune-all
+prune-all:
+	@podman image prune --all --force
 
 .PHONY: clean
 clean:
@@ -119,7 +119,7 @@ dist-clean mrproper: clean
 # --- Ansible/Build targets ---------------------------------------------------
 
 .PHONY: $(distributions)
-$(distributions): | $(VENV)
+$(distributions): | $(PLAYBOOK)
 	@$(PLAYBOOK) playbooks/build.yml --limit=$@
 
 .PHONY: all
@@ -128,10 +128,6 @@ all: $(distributions)
 .PHONY: dockerhub
 dockerhub: | $(PLAYBOOK)
 	@$(PLAYBOOK) playbooks/dockerhub.yml
-
-.PHONY: limit
-limit: | $(VENV)
-	@$(PLAYBOOK) playbooks/build.yml --limit=$(LIMIT)
 
 # --- git targets -------------------------------------------------------------
 
@@ -149,11 +145,13 @@ commit:
 # start a new feature branch
 .PHONY: start-feature
 start-feature:
+	@test -n "$(FEATURE)"
 	@git checkout -b $(FEATURE) dev
 
 # merge a feature branch to dev
 .PHONY: merge-feature-to-dev
 merge-feature-to-dev:
+	@test -n "$(FEATURE)"
 	@git checkout dev
 	@git merge $(FEATURE)
 	@git branch -d $(FEATURE)
@@ -169,7 +167,7 @@ prepare-release:
 
 # bump the version number and update the changelog
 .PHONY: version
-version:
+version: | $(PSR)
 	@git checkout main
 	@git pull --ff-only origin main
 	@$(PSR) version
@@ -181,7 +179,7 @@ version:
 
 # upload built distribution files to an existing release
 .PHONY: publish
-publish:
+publish: | $(PSR)
 	@git checkout main
 	@git pull --ff-only origin main
 	@$(PSR) publish
@@ -190,7 +188,7 @@ publish:
 
 # merge dev to main and create a new release, push changes to both branches
 .PHONY: release
-release:
+release: | $(PSR)
 	@git checkout main
 	@git pull --ff-only origin main
 	@git merge --ff-only dev
