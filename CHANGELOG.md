@@ -2,6 +2,59 @@
 
 <!-- version list -->
 
+## v2.2.0 (2026-04-20)
+
+### Bug Fixes
+
+- Decouple clean and prune targets in build scripts
+  ([`d0830b8`](https://github.com/jomrr/ansible-molecule-images/commit/d0830b8b7b6055f9e4024fed28ab38699cea2ecc))
+
+- Install,upgrade and build target dependencies
+  ([`ae9c472`](https://github.com/jomrr/ansible-molecule-images/commit/ae9c4728b55660f9024c5d5948e77449e5f82cfd))
+
+- Reinstall commit-msg hook on upgrade
+  ([`43769d0`](https://github.com/jomrr/ansible-molecule-images/commit/43769d070825d24ee6b7e7696d39a678dd816039))
+
+### Build System
+
+- Refactor build process and enhance Podman image management
+  ([`91acf20`](https://github.com/jomrr/ansible-molecule-images/commit/91acf20125632bbade2f86e69e9f065ac9265f2d))
+
+- Standardize Ansible configuration and defaults across project
+  ([`3c2af8e`](https://github.com/jomrr/ansible-molecule-images/commit/3c2af8ea0d08d73f70babc2f5bd43acc82f24e76))
+
+### Chores
+
+- Improve Ansible environment handling and update clean process
+  ([`49d0ce0`](https://github.com/jomrr/ansible-molecule-images/commit/49d0ce014c54b18aa13ff08938b1b7fb0b539f3c))
+
+### Continuous Integration
+
+- Simplify release process by eliminating merge steps
+  ([`45db24e`](https://github.com/jomrr/ansible-molecule-images/commit/45db24e6e1cdb8ee922485c929dac1672e5cf59a))
+
+### Documentation
+
+- Document the "prune-all" Makefile target in help output
+  ([`b96e06c`](https://github.com/jomrr/ansible-molecule-images/commit/b96e06c1bcee08f369ef9a729327294463decf12))
+
+### Features
+
+- Add builds per variant and generate build targets dynamically
+  ([`f8996b5`](https://github.com/jomrr/ansible-molecule-images/commit/f8996b5f14176cd15a111a9ab8eff10d8d1f2587))
+
+- Add separate prune command, clarify dependency management
+  ([`ab6764d`](https://github.com/jomrr/ansible-molecule-images/commit/ab6764d98cd26ae4c01a492844072056ee579c6f))
+
+### Refactoring
+
+- Improve feature workflow robustness and error handling
+  ([`26ac83d`](https://github.com/jomrr/ansible-molecule-images/commit/26ac83d7d0935836678e521c2888342fecd8b3be))
+
+- Refactor and streamline Makefile for robust git workflow automation
+  ([`fb5c63a`](https://github.com/jomrr/ansible-molecule-images/commit/fb5c63a28e51c9ed59ec5457e14eb501f50b2c13))
+
+
 ## v2.1.2 (2026-04-19)
 
 ### Bug Fixes
