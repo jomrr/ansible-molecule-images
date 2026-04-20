@@ -1,5 +1,5 @@
-# Makefile for ansible-molecule-images
-# name: ansible-molecule-images
+# Makefile for building ansible molecule container images
+# repo: jomrr/ansible-molecule-images
 # file: Makefile
 
 MAKEFLAGS	+= --no-builtin-rules
@@ -17,6 +17,7 @@ VENV			:= .venv
 PIP			:= $(VENV)/bin/pip
 PRE_COMMIT		:= $(VENV)/bin/pre-commit
 PSR			:= $(VENV)/bin/semantic-release
+
 # --- Ansible ------------------------------------------------------------------
 ANSIBLE			:= .ansible
 ANSIBLE_CFG		:= $(CURDIR)/ansible.cfg
@@ -25,21 +26,13 @@ GALAXY			:= $(VENV)/bin/ansible-galaxy
 GALAXY_COLL_INSTALL	:= $(GALAXY) collection install --collections-path $(ANSIBLE_COLLECTIONS)
 PLAYBOOK		:= $(VENV)/bin/ansible-playbook
 export ANSIBLE_CONFIG	:= $(ANSIBLE_CFG)
+
 # --- Makefile -----------------------------------------------------------------
-# no autocomplete for dynamic targets ... :(
-#distributions		:= $(shell $(INVENTORY) | jq -r 'keys[] | \
-#	select(. != "_meta" and . != "all") | @sh' | tr -d "'" | tr '\n' ' ')
-# list of all supported distributions
-distributions	:= \
-	almalinux \
-	alpine \
-	amazonlinux \
-	archlinux \
-	debian \
-	fedora \
-	opensuse \
-	oraclelinux \
-	ubuntu
+inventory		:= $(CURDIR)/containers.yml
+yq_groups		:= '.all.children | keys | .[]'
+yq_variants		:= '.all.children[] | .hosts | keys | .[]'
+groups			:= $(sort $(shell yq -r $(yq_groups) $(inventory)))
+variants		:= $(sort $(shell yq -r $(yq_variants) $(inventory)))
 
 # --- Help and Python virtual environment targets -----------------------------
 
@@ -61,8 +54,9 @@ help:
 	@echo "  mrproper              Alias for dist-clean"
 	@echo
 	@echo "Build:"
-	@echo "  all                   Build all supported distributions"
-	@echo "  <distro>              Build a specific distribution"
+	@echo "  all                   Build all supported groups/variants"
+	@echo "  <group>               Build a specific group of variants (e.g. 'fedora' or 'debian')"
+	@echo "  <variant>             Build a specific variant (e.g. 'fedora-44' or 'debian-13')"
 	@echo "  dockerhub             Update docker repository description"
 	@echo "  prune                 Prune local podman images"
 	@echo "  prune-all             Prune all local podman images"
@@ -77,8 +71,8 @@ help:
 	@echo "  prepare-release       Push dev, fast-forward merge dev into main and push to origin, then switch back to dev"
 	@echo "  release               Merge dev into main, run semantic-release, then merge main back into dev"
 	@echo
-	@echo "Supported distributions:"
-	@echo "  $(distributions)"
+	@echo "Supported groups:"
+	@echo "  $(groups)"
 
 $(PIP):
 	@python3 -m venv $(VENV)
@@ -123,12 +117,12 @@ dist-clean mrproper: clean
 
 # --- Ansible/Build targets ---------------------------------------------------
 
-.PHONY: $(distributions)
-$(distributions): | $(PLAYBOOK)
+.PHONY: $(groups) $(variants)
+$(groups) $(variants): | $(PLAYBOOK)
 	@$(PLAYBOOK) playbooks/build.yml --limit=$@
 
 .PHONY: all
-all: $(distributions)
+all: $(groups)
 
 .PHONY: dockerhub
 dockerhub: | $(PLAYBOOK)

@@ -86,6 +86,7 @@ The following prerequisites must be installed before using this playbook.
 - `python3` >= 3.12
 - `python3-pip`
 - `python3-virtualenv`
+- `yq` >= 4.47 (https://github.com/mikefarah/yq)
 
 #### Python (requirements.txt)
 
