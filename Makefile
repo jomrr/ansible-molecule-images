@@ -19,6 +19,9 @@ PRE_COMMIT		:= $(VENV)/bin/pre-commit
 PSR			:= $(VENV)/bin/semantic-release
 # --- Ansible ------------------------------------------------------------------
 ANSIBLE			:= .ansible
+ANSIBLE_CFG		:= $(CURDIR)/ansible.cfg
+ANSIBLE_ROLES		:= $(CURDIR)/$(ANSIBLE)/roles
+ANSIBLE_COLLECTIONS	:= $(CURDIR)/$(ANSIBLE)/collections
 GALAXY			:= $(VENV)/bin/ansible-galaxy
 PLAYBOOK		:= $(VENV)/bin/ansible-playbook
 # --- Makefile -----------------------------------------------------------------

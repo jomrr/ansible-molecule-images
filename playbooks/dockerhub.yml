@@ -6,7 +6,7 @@
   hosts: localhost
   gather_facts: false
   vars:
-    dockerhub_apply: false
+    dockerhub_apply: true
     dockerhub_groups: >-
       {{
         dockerhub_filter
