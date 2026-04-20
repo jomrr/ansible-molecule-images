@@ -102,6 +102,7 @@ upgrade: | $(VENV)
 	@$(PIP) install --upgrade pip
 	@$(PIP) install --upgrade -r $(REQS)
 	@$(GALAXY) install --force -r $(DEPS)
+	@$(PRE_COMMIT) install --hook-type commit-msg
 
 .PHONY: prune
 prune:
