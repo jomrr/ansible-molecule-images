@@ -59,6 +59,7 @@ help:
 	@echo "  <distro>              Build a specific distribution"
 	@echo "  dockerhub             Update docker repository description"
 	@echo "  prune                 Prune local podman images"
+	@echo "  prune-all             Prune all local podman images"
 	@echo
 	@echo "Git workflow:"
 	@echo "  checkout-dev          Switch to the dev branch"
