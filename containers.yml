@@ -105,14 +105,10 @@ all:
         fedora-44:
           push_tags:
             - "44"
+            - "latest"
         fedora-43:
           push_tags:
             - "43"
-            - "latest"
-        fedora-42:
-          push_tags:
-            - "42"
-            - "adams"
         fedora-rawhide:
           push_tags:
             - "45"
@@ -165,11 +161,11 @@ all:
           push_tags:
             - "26.04"
             - "resolute"
+            - "latest"
         ubuntu-24.04:
           push_tags:
             - "24.04"
             - "noble"
-            - "latest"
         ubuntu-22.04:
           push_tags:
             - "22.04"

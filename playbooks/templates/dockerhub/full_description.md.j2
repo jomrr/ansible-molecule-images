@@ -90,6 +90,9 @@ platforms:
   - name: instance
     image: "{{ image_ref }}:{{ example_tag }}"
     privileged: true
+    pre_build_image: true
+    entrypoint: null
+    command: null
 ```
 
 ### Molecule `podman` driver
@@ -100,6 +103,10 @@ To use the {{ item.display_name }} {{ example_tag }} image with the podman drive
 platforms:
   - name: instance
     image: "docker.io/{{ image_ref }}:{{ example_tag }}"
+    pre_build_image: true
+    entrypoint: null
+    command: null
+    systemd: true
 ```
 
 This will start a container with {{ item.display_name }} {{ example_tag }} and `{{ init_system }}` as `pid 0`,
