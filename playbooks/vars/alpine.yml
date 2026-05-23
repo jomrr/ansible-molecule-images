@@ -25,4 +25,9 @@ dockerfile:
     - sed -i '/tty/d' /etc/inittab
     - sed -i 's/hostname $opts/# hostname $opts/g' /etc/init.d/hostname
     - sed -i 's/mount -t tmpfs/# mount -t tmpfs/g' /lib/rc/sh/init.sh
-    - sed -i -e 's/^\(Defaults\s*requiretty\)/#--- \1/' /etc/sudoers
+    - touch /etc/sudoers
+    - sed -ie 's/^\(Defaults\s*requiretty\)/#--- \1/' /etc/sudoers
+    - printf '\nALL ALL=(ALL:ALL) NOPASSWD: ALL\n' >> /etc/sudoers
+    - printf '\nroot    ALL=(ALL:ALL) ALL\n' >> /etc/sudoers
+    - chmod 440 /etc/sudoers
+    - visudo -cf /etc/sudoers

@@ -12,6 +12,7 @@ dockerfile:
   packages:
     - bash
     - iproute2
+    - login_defs
     - python3
     - python3-xml
     - shadow
@@ -29,4 +30,7 @@ dockerfile:
     - systemctl mask getty.service
     - touch /etc/sudoers
     - sed -ie 's/^\(Defaults\s*requiretty\)/#--- \1/' /etc/sudoers
-    - echo "root    ALL=(ALL:ALL) ALL" >> /etc/sudoers
+    - printf '\nALL ALL=(ALL:ALL) NOPASSWD: ALL\n' >> /etc/sudoers
+    - printf '\nroot    ALL=(ALL:ALL) ALL\n' >> /etc/sudoers
+    - chmod 440 /etc/sudoers
+    - visudo -cf /etc/sudoers
