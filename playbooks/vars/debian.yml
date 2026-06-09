@@ -22,7 +22,7 @@ dockerfile:
     - sudo
     - systemd
     - systemd-sysv
-  package_clean: "apt-get -y autoremove && apt-get -y clean"
+  package_clean: "apt-get -y autoremove && apt-get -y clean && rm -rf /var/cache/apt/archives/*.deb /var/cache/apt/archives/partial/*.deb && apt-get update"
   commands:
     - find /etc/systemd/system /lib/systemd/system -path 'sysinit.target.wants/*' -not -name '*systemd-tmpfiles*' -delete
     - rm -f /lib/systemd/system/multi-user.target.wants/*
