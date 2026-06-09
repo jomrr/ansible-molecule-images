@@ -2,6 +2,37 @@
 
 <!-- version list -->
 
+## v2.3.0 (2026-06-09)
+
+### Build System
+
+- **container**: Update container support and example configuration fields
+  ([`e91c824`](https://github.com/jomrr/ansible-molecule-images/commit/e91c824968d4ed2c7014d776e4d30fa86c6ae07c))
+
+- **package**: Improve package cleanup and post-cleaning update procedures
+  ([`bef8d79`](https://github.com/jomrr/ansible-molecule-images/commit/bef8d79c2ec6361b7c7b308e2ac63681e1c7fc89))
+
+### Continuous Integration
+
+- Refactor image workflows for efficiency and reproducibility
+  ([`cf7f8bb`](https://github.com/jomrr/ansible-molecule-images/commit/cf7f8bb04a6ee45e27485ea82e58009e21b44c57))
+
+### Documentation
+
+- Fix molecule examples
+  ([`02761b9`](https://github.com/jomrr/ansible-molecule-images/commit/02761b9f3638a39b50475302bba73db1607abf4d))
+
+### Features
+
+- Change sudo configuration across all distributions
+  ([`6825899`](https://github.com/jomrr/ansible-molecule-images/commit/682589964a46fef913d08e7af0b8d834c58398f2))
+
+### Refactoring
+
+- **sudoers**: Standardize user and sudoers management across all distributions
+  ([`9a16bfd`](https://github.com/jomrr/ansible-molecule-images/commit/9a16bfdd0eceadadbefede39d17be90afdef9812))
+
+
 ## v2.2.0 (2026-04-20)
 
 ### Bug Fixes
