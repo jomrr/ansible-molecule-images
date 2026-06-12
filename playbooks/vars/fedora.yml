@@ -11,12 +11,14 @@ dockerfile:
   package_install: "dnf -qy --nodocs --setopt=tsflags=nodocs install"
   packages:
     - bash
+    - dbus
     - findutils
     - hostname
     - iproute
     - passwd
     - procps
     - python3-libdnf5
+    - shadow-utils
     - sudo
     - systemd
   package_clean: "dnf -qy autoremove && dnf -qy clean all"
@@ -29,6 +31,10 @@ dockerfile:
     - rm -f /lib/systemd/system/sockets.target.wants/*initctl*
     - rm -f /lib/systemd/system/basic.target.wants/*
     - rm -f /lib/systemd/system/anaconda.target.wants/*
+    - systemctl unmask systemd-logind.service
+    - systemctl enable systemd-logind.service
+    - systemctl enable dbus.socket
+    - systemctl enable dbus-broker.service
     - systemctl mask getty.service
     - 'getent group 1000 >/dev/null || groupadd -g 1000 ansible'
     - 'getent passwd 1000 >/dev/null || useradd -u 1000 -g 1000 -m -s /bin/bash ansible'

@@ -11,6 +11,7 @@ dockerfile:
   package_install: "yum -qy --nodocs --setopt=tsflags=nodocs install"
   packages:
     - bash
+    - dbus
     - findutils
     - hostname
     - initscripts
@@ -18,7 +19,9 @@ dockerfile:
     - passwd
     - procps-ng
     - python3
+    - shadow-utils
     - sudo
+    - systemd
     - systemd-libs
   package_clean: "yum -qy autoremove && yum -qy clean all"
   commands:
@@ -30,6 +33,8 @@ dockerfile:
     - rm -f /lib/systemd/system/sockets.target.wants/*initctl*
     - rm -f /lib/systemd/system/basic.target.wants/*
     - rm -f /lib/systemd/system/anaconda.target.wants/*
+    - systemctl unmask systemd-logind.service
+    - systemctl enable systemd-logind.service
     - systemctl enable dbus.socket
     - systemctl enable dbus-broker.service
     - systemctl mask getty.service
