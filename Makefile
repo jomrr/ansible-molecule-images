@@ -33,16 +33,21 @@ yq_groups		:= '.all.children | keys | .[]'
 yq_variants		:= '.all.children[] | .hosts | keys | .[]'
 groups			:= $(sort $(shell yq -r $(yq_groups) $(inventory)))
 variants		:= $(sort $(shell yq -r $(yq_variants) $(inventory)))
+PUBLISH			?= false
+GROUP			?=
+dockerhub_filter	= $(if $(strip $(GROUP)),--extra-vars=dockerhub_filter=$(GROUP))
 
 # --- Help and Python virtual environment targets -----------------------------
 
 # default target
 .PHONY: help
 help:
-	@echo "Usage: make <target> [FEATURE=<branch-name>]"
+	@echo "Usage: make <target> [FEATURE=<branch-name>] [GROUP=<group>] [PUBLISH=true]"
 	@echo
 	@echo "Environment:"
 	@echo "  FEATURE=<branch-name>    Feature branch name for start-feature / merge-feature-to-dev"
+	@echo "  GROUP=<group>            Limit Docker Hub metadata or cleanup to one inventory group"
+	@echo "  PUBLISH=true             Publish built images; default is build-only"
 	@echo
 	@echo "Targets:"
 	@echo "  help                  Show this help"
@@ -54,11 +59,11 @@ help:
 	@echo "  mrproper              Alias for dist-clean"
 	@echo
 	@echo "Build:"
-	@echo "  all                   Build all supported groups/variants"
-	@echo "  <group>               Build a specific group of variants (e.g. 'fedora' or 'debian')"
-	@echo "  <variant>             Build a specific variant (e.g. 'fedora-44' or 'debian-13')"
-	@echo "  docker-metadata       Update Docker Hub repository metadata"
-	@echo "  docker-cleanup        Delete untagged Docker Hub images"
+	@echo "  all                   Build all supported groups/variants; use PUBLISH=true to publish"
+	@echo "  <group>               Build a group; use PUBLISH=true to publish"
+	@echo "  <variant>             Build a variant; use PUBLISH=true to publish"
+	@echo "  docker-metadata       Update Docker Hub metadata; optionally limit with GROUP=..."
+	@echo "  docker-cleanup        Delete untagged Docker Hub images; optionally limit with GROUP=..."
 	@echo "  prune                 Prune local podman images"
 	@echo "  prune-all             Prune all local podman images"
 	@echo
@@ -120,18 +125,21 @@ dist-clean mrproper: clean
 
 .PHONY: $(groups) $(variants)
 $(groups) $(variants): | $(PLAYBOOK)
-	@$(PLAYBOOK) playbooks/build.yml --limit=$@
+	@$(PLAYBOOK) playbooks/build.yml \
+		--limit=$@ \
+		--extra-vars=publish_images=$(PUBLISH) \
+		--extra-vars=build_no_log=$(PUBLISH)
 
 .PHONY: all
 all: $(groups)
 
 .PHONY: docker-metadata
 docker-metadata: | $(PLAYBOOK)
-	@$(PLAYBOOK) playbooks/docker-metadata.yml
+	@$(PLAYBOOK) playbooks/docker-metadata.yml $(dockerhub_filter)
 
 .PHONY: docker-cleanup
 docker-cleanup: | $(PLAYBOOK)
-	@$(PLAYBOOK) playbooks/docker-cleanup.yml
+	@$(PLAYBOOK) playbooks/docker-cleanup.yml $(dockerhub_filter)
 
 # --- git targets -------------------------------------------------------------
 

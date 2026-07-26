@@ -6,16 +6,47 @@
   hosts: localhost
   gather_facts: false
   vars:
-    dockerhub_namespace: "{{ lookup('ansible.builtin.env', 'DOCKER_USER') }}"
-    dockerhub_repositories: >-
+    dockerhub_available_groups: >-
       {{
-        groups['all']
-        | map('extract', hostvars, 'push_repo')
+        groups.keys()
+        | difference(['all', 'ungrouped', 'localhost'])
+        | list
+        | sort
+      }}
+    dockerhub_groups: >-
+      {{
+        [dockerhub_filter | default(dockerhub_available_groups)]
+        | flatten
         | unique
         | sort
-        | list
       }}
+    dockerhub_namespace: "{{ lookup('ansible.builtin.env', 'DOCKER_USER') }}"
   tasks:
+    - name: "Validate requested Docker Hub groups"
+      ansible.builtin.assert:
+        that:
+          - item in dockerhub_available_groups
+        fail_msg: >-
+          Unknown Docker Hub group '{{ item }}'.
+          Available groups: {{ dockerhub_available_groups | join(', ') }}
+        quiet: true
+      loop: "{{ dockerhub_groups }}"
+      loop_control:
+        label: "{{ item }}"
+
+    - name: "Build Docker Hub repository list"
+      ansible.builtin.set_fact:
+        dockerhub_repositories: >-
+          {{
+            dockerhub_groups
+            | map('extract', groups)
+            | flatten
+            | map('extract', hostvars, 'push_repo')
+            | unique
+            | sort
+            | list
+          }}
+
     - name: "Authenticate with Docker Hub"
       no_log: true
       check_mode: false

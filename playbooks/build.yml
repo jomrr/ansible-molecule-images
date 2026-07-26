@@ -5,6 +5,9 @@
 - name: "Build and publish container images"
   hosts: all
   gather_facts: false
+  vars:
+    publish_images: false
+    _targets: []
   tasks:
     - name: "Load image variant variables"
       ansible.builtin.include_vars:
@@ -43,10 +46,16 @@
           target: "{{ registry.name }}/{{ registry.username }}/{{ push_repo }}:{{ push_tag }}"
           origin: "{{ registry.name }}/{{ registry.username }}/{{ push_repo }}"
           tag: "{{ push_tag }}"
-      loop: "{{ push_registries | product(push_tags) | list }}"
+      loop: >-
+        {{
+          push_registries | product(push_tags) | list
+          if publish_images | bool
+          else []
+        }}
       loop_control:
         loop_var: pair
         label: "{{ pair.0.name }}/{{ pair.0.username }}/{{ push_repo }}:{{ pair.1 }}"
+      when: publish_images | bool
 
     - name: "Build local image variant"
       no_log: "{{ build_no_log }}"
@@ -71,6 +80,7 @@
       containers.podman.podman_tag:
         image: "localhost/{{ push_repo }}:{{ inventory_hostname }}"
         target_names: "{{ _targets | map(attribute='target') | unique | list }}"
+      when: publish_images | bool
 
     - name: "Push image tags to registries"
       no_log: "{{ build_no_log }}"
@@ -84,3 +94,4 @@
       loop_control:
         loop_var: push
         label: "{{ push.target }}"
+      when: publish_images | bool
