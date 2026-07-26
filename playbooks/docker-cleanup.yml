@@ -1,0 +1,168 @@
+---
+# repo: jomrr/ansible-molecule-images
+# file: playbooks/docker-cleanup.yml
+
+- name: "Delete untagged Docker Hub image manifests"
+  hosts: localhost
+  gather_facts: false
+  vars:
+    dockerhub_namespace: "{{ lookup('ansible.builtin.env', 'DOCKER_USER') }}"
+    dockerhub_repositories: >-
+      {{
+        groups['all']
+        | map('extract', hostvars, 'push_repo')
+        | unique
+        | sort
+        | list
+      }}
+  tasks:
+    - name: "Authenticate with Docker Hub"
+      no_log: true
+      check_mode: false
+      ansible.builtin.uri:
+        url: "https://hub.docker.com/v2/auth/token"
+        method: POST
+        body_format: json
+        body:
+          identifier: "{{ dockerhub_namespace }}"
+          secret: "{{ lookup('ansible.builtin.env', 'DOCKER_SECRET') }}"
+        return_content: true
+        status_code: 200
+      register: _dockerhub_auth
+
+    - name: "Fetch Docker Hub repository manifests"
+      no_log: true
+      check_mode: false
+      ansible.builtin.uri:
+        url: >-
+          https://hub.docker.com/v2/namespaces/{{ dockerhub_namespace
+          }}/repositories/{{ dockerhub_repository }}/manifests?page_size=100
+        method: GET
+        headers:
+          Authorization: "Bearer {{ _dockerhub_auth.json.access_token }}"
+        return_content: true
+        status_code: 200
+        unredirected_headers:
+          - "Authorization"
+      loop: "{{ dockerhub_repositories }}"
+      loop_control:
+        loop_var: dockerhub_repository
+        label: "{{ dockerhub_repository }}"
+      register: _dockerhub_manifests
+
+    - name: "Validate Docker Hub manifest responses"
+      ansible.builtin.assert:
+        that:
+          - _dockerhub_invalid_responses | length == 0
+        fail_msg: >-
+          Docker Hub returned invalid or paginated manifest responses for
+          {{ _dockerhub_invalid_responses | join(', ') }}.
+      vars:
+        _dockerhub_invalid_responses: >-
+          {%- set ns = namespace(items=[]) -%}
+          {%- for response in _dockerhub_manifests.results -%}
+            {%- if response.json.manifests is not defined
+              or response.json.manifests is not sequence
+              or response.json.last_evaluated_key is not defined
+              or response.json.last_evaluated_key
+                 | default('', true)
+                 | length > 0
+            -%}
+              {%- set _ = ns.items.append(response.dockerhub_repository) -%}
+            {%- endif -%}
+          {%- endfor -%}
+          {{ ns.items }}
+
+    - name: "Select untagged image manifests"
+      ansible.builtin.set_fact:
+        _dockerhub_cleanup_candidates: >-
+          {%- set ns = namespace(items=[]) -%}
+          {%- for response in _dockerhub_manifests.results -%}
+            {%- for manifest in response.json.manifests -%}
+              {%- if manifest.tags is defined
+                and manifest.manifest_digest is defined
+                and manifest.tags | length == 0
+                and manifest.manifest_digest
+                    is match('^sha256:[0-9a-f]{64}$')
+              -%}
+                {%- set _ = ns.items.append({
+                  'digest': manifest.manifest_digest,
+                  'repo': response.dockerhub_repository
+                }) -%}
+              {%- endif -%}
+            {%- endfor -%}
+          {%- endfor -%}
+          {{ ns.items }}
+
+    - name: "Display deletion candidates"
+      ansible.builtin.debug:
+        msg:
+          mode: "{{ 'preview' if ansible_check_mode else 'delete' }}"
+          count: "{{ _dockerhub_cleanup_candidates | length }}"
+          candidates: "{{ _dockerhub_cleanup_candidates }}"
+
+    - name: "Request Docker Registry deletion token"
+      no_log: true
+      ansible.builtin.uri:
+        url: >-
+          https://auth.docker.io/token?service=registry.docker.io&{{
+          _dockerhub_cleanup_scopes }}
+        method: GET
+        url_username: "{{ lookup('ansible.builtin.env', 'DOCKER_USER') }}"
+        url_password: "{{ lookup('ansible.builtin.env', 'DOCKER_SECRET') }}"
+        force_basic_auth: true
+        return_content: true
+        status_code: 200
+        unredirected_headers:
+          - "Authorization"
+      register: _dockerhub_cleanup_auth
+      vars:
+        _dockerhub_cleanup_scopes: >-
+          {%- set ns = namespace(items=[]) -%}
+          {%- for repo in dockerhub_repositories -%}
+            {%- set scope = (
+              'repository:'
+              ~ dockerhub_namespace
+              ~ '/'
+              ~ repo
+              ~ ':pull,push,delete'
+            ) -%}
+            {%- set _ = ns.items.append('scope=' ~ (scope | urlencode)) -%}
+          {%- endfor -%}
+          {{ ns.items | join('&') }}
+      when:
+        - not ansible_check_mode
+        - _dockerhub_cleanup_candidates | default([]) | length > 0
+
+    - name: "Delete untagged image manifests"
+      no_log: true
+      ansible.builtin.uri:
+        url: >-
+          https://registry-1.docker.io/v2/{{ dockerhub_namespace
+          }}/{{ dockerhub_cleanup_candidate.repo
+          }}/manifests/{{ dockerhub_cleanup_candidate.digest }}
+        method: DELETE
+        headers:
+          Authorization: >-
+            Bearer {{
+              _dockerhub_cleanup_auth.json.token
+              | default(
+                  _dockerhub_cleanup_auth.json.access_token,
+                  true
+                )
+            }}
+        status_code:
+          - 202
+          - 404
+        unredirected_headers:
+          - "Authorization"
+      loop: >-
+        {{
+          _dockerhub_cleanup_candidates
+          if not ansible_check_mode
+          else []
+        }}
+      loop_control:
+        loop_var: dockerhub_cleanup_candidate
+      register: _dockerhub_cleanup_delete
+      changed_when: _dockerhub_cleanup_delete.status == 202

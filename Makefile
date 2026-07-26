@@ -57,7 +57,8 @@ help:
 	@echo "  all                   Build all supported groups/variants"
 	@echo "  <group>               Build a specific group of variants (e.g. 'fedora' or 'debian')"
 	@echo "  <variant>             Build a specific variant (e.g. 'fedora-44' or 'debian-13')"
-	@echo "  dockerhub             Update docker repository description"
+	@echo "  docker-metadata       Update Docker Hub repository metadata"
+	@echo "  docker-cleanup        Delete untagged Docker Hub images"
 	@echo "  prune                 Prune local podman images"
 	@echo "  prune-all             Prune all local podman images"
 	@echo
@@ -124,9 +125,13 @@ $(groups) $(variants): | $(PLAYBOOK)
 .PHONY: all
 all: $(groups)
 
-.PHONY: dockerhub
-dockerhub: | $(PLAYBOOK)
-	@$(PLAYBOOK) playbooks/dockerhub.yml
+.PHONY: docker-metadata
+docker-metadata: | $(PLAYBOOK)
+	@$(PLAYBOOK) playbooks/docker-metadata.yml
+
+.PHONY: docker-cleanup
+docker-cleanup: | $(PLAYBOOK)
+	@$(PLAYBOOK) playbooks/docker-cleanup.yml
 
 # --- git targets -------------------------------------------------------------
 

@@ -1,8 +1,8 @@
 ---
 # repo: jomrr/ansible-molecule-images
-# file: playbooks/dockerhub.yml
+# file: playbooks/docker-metadata.yml
 
-- name: "PLAYBOOK | Manage dockerhub repositories"
+- name: "Update Docker Hub repository metadata"
   hosts: localhost
   gather_facts: false
   vars:
@@ -19,7 +19,7 @@
       }}
     dockerhub_namespace: "{{ lookup('ansible.builtin.env', 'DOCKER_USER') }}"
   tasks:
-    - name: "Generate flat host list for filtered groups"
+    - name: "Select inventory hosts from requested groups"
       ansible.builtin.set_fact:
         _host_entries: >-
           {{
@@ -31,7 +31,7 @@
             | sort
           }}
 
-    - name: "Generate repository list for dockerhub"
+    - name: "Build Docker Hub repository list"
       ansible.builtin.set_fact:
         _repos: >-
           {%- set ns = namespace(items=[]) -%}
@@ -48,40 +48,28 @@
           {%- endfor -%}
           {{ ns.items }}
 
-    # - name: "Fetch docker repos"  # noqa: run-once
-    #   no_log: false
-    #   run_once: true
-    #   ansible.builtin.uri:
-    #     url: "https://registry.hub.docker.com/v2/repositories/{{ item.username }}"
-    #     method: GET
-    #     user: "{{ item.username }}"
-    #     password: "{{ item.password }}"
-    #   loop: "{{ push_registries }}"
-    #   register: _docker_repos
-    #   when: item.name == 'docker.io'
-
-    - name: "Create build directory"
+    - name: "Create metadata render directories"
       ansible.builtin.file:
         path: "{{ build_dir }}/{{ item }}"
         state: directory
         mode: '0755'
       loop: "{{ _repos | map(attribute='slug') | list }}"
 
-    - name: "Render dockerhub description"
+    - name: "Render repository short descriptions"
       ansible.builtin.template:
         src: "templates/dockerhub/description.txt.j2"
         dest: "{{ build_dir }}/{{ item.slug }}/description.txt"
         mode: "0644"
       loop: "{{ _repos }}"
 
-    - name: "Render dockerhub full_description"
+    - name: "Render repository full descriptions"
       ansible.builtin.template:
         src: "templates/dockerhub/full_description.md.j2"
         dest: "{{ build_dir }}/{{ item.slug }}/full_description.md"
         mode: "0644"
       loop: "{{ _repos }}"
 
-    - name: "Authenticate to Docker Hub"
+    - name: "Authenticate with Docker Hub"
       no_log: true
       ansible.builtin.uri:
         url: "https://hub.docker.com/v2/auth/token"

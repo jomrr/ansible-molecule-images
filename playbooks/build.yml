@@ -2,11 +2,11 @@
 # repo: jomrr/ansible-molecule-images
 # file: playbooks/build.yml
 
-- name: "PLAYBOOK | Generate Dockerfiles and build container images"
+- name: "Build and publish container images"
   hosts: all
   gather_facts: false
   tasks:
-    - name: "Import variable files"
+    - name: "Load image variant variables"
       ansible.builtin.include_vars:
         file: "{{ lookup('ansible.builtin.first_found', params) }}"
       vars:
@@ -18,19 +18,19 @@
             - 'vars'
           skip: false
 
-    - name: "Create build directory"
+    - name: "Create image build directory"
       ansible.builtin.file:
         path: "{{ build_dir }}/{{ push_image }}"
         state: directory
         mode: '0755'
 
-    - name: "Generate Dockerfile"
+    - name: "Render image Dockerfile"
       ansible.builtin.template:
         src: "templates/Dockerfile.j2"
         dest: "{{ build_dir }}/{{ push_image }}/{{ inventory_hostname }}"
         mode: '0644'
 
-    - name: "Generate tag/push matrix"
+    - name: "Generate registry target matrix"
       no_log: "{{ build_no_log }}"
       ansible.builtin.set_fact:
         _targets: "{{ (_targets | default([])) + [target_spec] }}"
@@ -48,7 +48,7 @@
         loop_var: pair
         label: "{{ pair.0.name }}/{{ pair.0.username }}/{{ push_repo }}:{{ pair.1 }}"
 
-    - name: "Build local image once per variant"
+    - name: "Build local image variant"
       no_log: "{{ build_no_log }}"
       containers.podman.podman_image:
         name: "localhost/{{ push_repo }}"
@@ -66,13 +66,13 @@
             --rewrite-timestamp
         force: true
 
-    - name: "Tag local image for all targets"
+    - name: "Tag image for target registries"
       no_log: "{{ build_no_log }}"
       containers.podman.podman_tag:
         image: "localhost/{{ push_repo }}:{{ inventory_hostname }}"
         target_names: "{{ _targets | map(attribute='target') | unique | list }}"
 
-    - name: "Push all tags to registries"
+    - name: "Push image tags to registries"
       no_log: "{{ build_no_log }}"
       containers.podman.podman_image:
         name: "{{ push.origin }}"
