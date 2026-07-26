@@ -69,37 +69,90 @@
         mode: "0644"
       loop: "{{ _repos }}"
 
-    - name: "Authenticate with Docker Hub"
-      no_log: true
-      ansible.builtin.uri:
-        url: "https://hub.docker.com/v2/auth/token"
-        method: POST
-        body_format: json
-        body:
-          identifier: "{{ dockerhub_namespace }}"
-          secret: "{{ lookup('ansible.builtin.env', 'DOCKER_SECRET') }}"
-        headers:
-          Content-Type: "application/json"
-        return_content: true
-        status_code: 200
-      register: _dockerhub_auth
+    - name: "Apply Docker Hub repository metadata changes"
       when: dockerhub_apply | bool
+      block:
+        - name: "Build desired Docker Hub repository metadata"
+          ansible.builtin.set_fact:
+            _dockerhub_desired_metadata: >-
+              {{
+                (_dockerhub_desired_metadata | default([]))
+                + [{
+                  'repository': repository.repo,
+                  'description': lookup(
+                    'ansible.builtin.file',
+                    build_dir ~ '/' ~ repository.slug ~ '/description.txt'
+                  ) | trim,
+                  'full_description': lookup(
+                    'ansible.builtin.file',
+                    build_dir ~ '/' ~ repository.slug ~
+                    '/full_description.md'
+                  )
+                }]
+              }}
+          loop: "{{ _repos }}"
+          loop_control:
+            loop_var: repository
+            label: "{{ repository.repo }}"
 
-    - name: "Update Docker Hub repository metadata"
-      no_log: true
-      ansible.builtin.uri:
-        url: "https://hub.docker.com/v2/repositories/{{ dockerhub_namespace }}/{{ item.repo }}/"
-        method: PATCH
-        body_format: json
-        body:
-          description: "{{ lookup('ansible.builtin.file', build_dir ~ '/' ~ item.slug ~ '/description.txt') | trim }}"
-          full_description: "{{ lookup('ansible.builtin.file', build_dir ~ '/' ~ item.slug ~ '/full_description.md') }}"
-        headers:
-          Authorization: "Bearer {{ _dockerhub_auth.json.access_token }}"
-          Content-Type: "application/json"
-        status_code: 200
-        return_content: true
-      loop: "{{ _repos }}"
-      loop_control:
-        label: "{{ item.repo }}"
-      when: dockerhub_apply | bool
+        - name: "Authenticate with Docker Hub"
+          no_log: true
+          ansible.builtin.uri:
+            url: "https://hub.docker.com/v2/auth/token"
+            method: POST
+            body_format: json
+            body:
+              identifier: "{{ dockerhub_namespace }}"
+              secret: "{{ lookup('ansible.builtin.env', 'DOCKER_SECRET') }}"
+            headers:
+              Content-Type: "application/json"
+            return_content: true
+            status_code: 200
+          register: _dockerhub_auth
+
+        - name: "Fetch current Docker Hub repository metadata"
+          no_log: true
+          ansible.builtin.uri:
+            url: >-
+              https://hub.docker.com/v2/namespaces/{{ dockerhub_namespace
+              }}/repositories/{{ desired_metadata.repository }}
+            method: GET
+            headers:
+              Authorization: "Bearer {{ _dockerhub_auth.json.access_token }}"
+            return_content: true
+            status_code: 200
+            unredirected_headers:
+              - "Authorization"
+          loop: "{{ _dockerhub_desired_metadata }}"
+          loop_control:
+            loop_var: desired_metadata
+            label: "{{ desired_metadata.repository }}"
+          register: _dockerhub_current_metadata
+
+        - name: "Update Docker Hub repository metadata"
+          no_log: true
+          ansible.builtin.uri:
+            url: >-
+              https://hub.docker.com/v2/repositories/{{ dockerhub_namespace
+              }}/{{ metadata_result.desired_metadata.repository }}/
+            method: PATCH
+            body_format: json
+            body:
+              description: "{{ metadata_result.desired_metadata.description }}"
+              full_description: "{{ metadata_result.desired_metadata.full_description }}"
+            headers:
+              Authorization: "Bearer {{ _dockerhub_auth.json.access_token }}"
+              Content-Type: "application/json"
+            status_code: 200
+            return_content: true
+            unredirected_headers:
+              - "Authorization"
+          loop: "{{ _dockerhub_current_metadata.results }}"
+          loop_control:
+            loop_var: metadata_result
+            label: "{{ metadata_result.desired_metadata.repository }}"
+          when: >-
+            metadata_result.json.description
+            != metadata_result.desired_metadata.description
+            or metadata_result.json.full_description
+            != metadata_result.desired_metadata.full_description
