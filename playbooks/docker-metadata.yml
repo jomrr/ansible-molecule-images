@@ -7,18 +7,34 @@
   gather_facts: false
   vars:
     dockerhub_apply: true
+    dockerhub_available_groups: >-
+      {{
+        groups.keys()
+        | difference(['all', 'ungrouped', 'localhost'])
+        | list
+        | sort
+      }}
     dockerhub_groups: >-
       {{
-        dockerhub_filter
-        | default(
-            groups.keys()
-            | difference(['all', 'ungrouped', 'localhost'])
-            | list
-            | sort
-          )
+        [dockerhub_filter | default(dockerhub_available_groups)]
+        | flatten
+        | unique
+        | sort
       }}
     dockerhub_namespace: "{{ lookup('ansible.builtin.env', 'DOCKER_USER') }}"
   tasks:
+    - name: "Validate requested Docker Hub groups"
+      ansible.builtin.assert:
+        that:
+          - item in dockerhub_available_groups
+        fail_msg: >-
+          Unknown Docker Hub group '{{ item }}'.
+          Available groups: {{ dockerhub_available_groups | join(', ') }}
+        quiet: true
+      loop: "{{ dockerhub_groups }}"
+      loop_control:
+        label: "{{ item }}"
+
     - name: "Select inventory hosts from requested groups"
       ansible.builtin.set_fact:
         _host_entries: >-
