@@ -110,7 +110,7 @@ platforms:
     image: "docker.io/{{ image_ref }}:{{ example_tag }}"
     pre_build_image: true
     override_command: false
-    systemd: true
+    systemd: "true"
 ```
 
 This will start a container with {{ item.display_name }} {{ example_tag }} and `{{ init_system }}` as `pid 1`,

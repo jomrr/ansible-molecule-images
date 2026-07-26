@@ -167,8 +167,10 @@
           loop_control:
             loop_var: metadata_result
             label: "{{ metadata_result.desired_metadata.repository }}"
+          register: _dockerhub_metadata_update
           when: >-
             metadata_result.json.description
             != metadata_result.desired_metadata.description
             or metadata_result.json.full_description
             != metadata_result.desired_metadata.full_description
+          changed_when: _dockerhub_metadata_update.status == 200
