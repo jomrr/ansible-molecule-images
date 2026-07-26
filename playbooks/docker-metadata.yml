@@ -86,6 +86,7 @@
       when: dockerhub_apply | bool
 
     - name: "Update Docker Hub repository metadata"
+      no_log: true
       ansible.builtin.uri:
         url: "https://hub.docker.com/v2/repositories/{{ dockerhub_namespace }}/{{ item.repo }}/"
         method: PATCH
