@@ -33,11 +33,14 @@ all:
         alpine-edge:
           push_tags:
             - "edge"
+        alpine-3.24:
+          push_tags:
+            - "3.24"
+            - "3"
+            - "latest"
         alpine-3.23:
           push_tags:
             - "3.23"
-            - "3"
-            - "latest"
         alpine-3.22:
           push_tags:
             - "3.22"
@@ -83,11 +86,6 @@ all:
             - "bookworm"
             - "12"
             - "oldstable"
-        debian-11:
-          push_tags:
-            - "bullseye"
-            - "11"
-            - "oldoldstable"
         debian-sid:
           push_tags:
             - "sid"

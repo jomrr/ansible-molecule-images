@@ -3,8 +3,10 @@
 # file: .pre-commit-config.yaml
 
 repos:
-  - repo: https://github.com/commitizen-tools/commitizen
-    rev: v4.13.10
+  - repo: local
     hooks:
       - id: commitizen
+        name: commitizen
+        entry: .venv/bin/cz check --commit-msg-file
+        language: system
         stages: [commit-msg]

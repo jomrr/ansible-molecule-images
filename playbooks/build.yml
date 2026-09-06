@@ -34,7 +34,7 @@
         mode: '0644'
 
     - name: "Generate registry target matrix"
-      no_log: "{{ build_no_log }}"
+      # no_log: "{{ build_no_log }}"
       ansible.builtin.set_fact:
         _targets: "{{ (_targets | default([])) + [target_spec] }}"
       vars:
@@ -58,7 +58,7 @@
       when: publish_images | bool
 
     - name: "Build local image variant"
-      no_log: "{{ build_no_log }}"
+      # no_log: "{{ build_no_log }}"
       containers.podman.podman_image:
         name: "localhost/{{ push_repo }}"
         tag: "{{ inventory_hostname }}"
@@ -83,7 +83,7 @@
       when: publish_images | bool
 
     - name: "Push image tags to registries"
-      no_log: "{{ build_no_log }}"
+      # no_log: "{{ build_no_log }}"
       containers.podman.podman_image:
         name: "{{ push.origin }}"
         tag: "{{ push.tag }}"

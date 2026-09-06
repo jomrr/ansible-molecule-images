@@ -10,7 +10,7 @@ container images running an init system for use in Ansible Molecule tests.
 ## TL;DR
 
 ```bash
-sudo dnf -y install git make python3 python3-pip python3-virtualenv
+sudo dnf -y install git make python3 uv yq
 
 mkdir -p ~/src/ansible && cd ~/src/ansible
 
@@ -18,8 +18,7 @@ git clone https://github.com/jomrr/ansible-molecule-images
 
 cd ansible-molecule-images
 
-pip install --user --upgrade pip
-pip install --user keyring
+uv tool install keyring
 
 # set docker registry user and secret, add to ~/.bashrc or ~/.bashrc.d/env
 keyring set docker user
@@ -37,7 +36,10 @@ make all
 # or:
 make <almalinux|alpine|amazonlinux|archlinux|debian|fedora|opensuse|oraclelinux|ubuntu>
 
-# to upgrade the virtualenv packages and ansible-galaxy dependencies run:
+# publish the built images:
+make all PUBLISH=true
+
+# upgrade the Python and Ansible Galaxy dependencies:
 make upgrade
 ```
 
@@ -45,8 +47,8 @@ make upgrade
 
 The playbook [`playbooks/build.yml`](playbooks/build.yml) uses the `ansible.builtin.template`
 module to render Dockerfiles to `build/{{ inventory_hostname }}/Dockerfile` and then uses
-the `containers.podman.podman_image` module to build and push the images to the registries
-configured in [`containers.yml`](containers.yml).
+the `containers.podman.podman_image` module to build the images. Publishing to the registries
+configured in [`containers.yml`](containers.yml) is enabled with `PUBLISH=true`.
 
 In this file, registries and their credentials are defined as a list of dictionaries under
 the key `push_registries`. The name of the built image is configured via the host variable
@@ -84,32 +86,33 @@ The following prerequisites must be installed before using this playbook.
 - `git`
 - `make` >= 4.3
 - `python3` >= 3.12
-- `python3-pip`
-- `python3-virtualenv`
+- `uv`
 - `yq` >= 4.47 (https://github.com/mikefarah/yq)
 
-#### Python (requirements.txt)
+#### Python (`pyproject.toml`)
 
-The python prerequisites are installed in a virtualenv `.venv` via the Makefile with `make install`.
+`make install` creates `.venv` with `uv` and installs the dependencies declared in
+[`pyproject.toml`](pyproject.toml). No Python lock file is used; dependency constraints
+are maintained exclusively in `pyproject.toml`.
 
-- ansible >= 2.18
-
-To install it manually in the user environment without a virtualenv run:
+The equivalent manual commands are:
 
 ```bash
-pip install --user --upgrade pip
-pip install --user --upgrade 'ansible>=2.18'
+uv venv
+uv pip install -r pyproject.toml
 ```
 
-For development the following are also installed by `make install`:
+The Python dependencies are:
 
+- ansible >= 2.18
 - commitizen
 - pre-commit
 - python-semantic-release
 
 ### Dependencies (requirements.yml)
 
-The `containers.podman` collection will be installed in the virtualenv during `make install`.
+The `containers.podman` collection is installed in the local `.ansible` environment during
+`make install`.
 
 To install it manually for your regular user without virtualenv run:
 
@@ -139,7 +142,7 @@ ansible-galaxy install -r requirements.yml
 
 ### Usage / Examples
 
-#### Build and push images for `Fedora` and `Debian`
+#### Build images for `Fedora` and `Debian`
 
 All Fedora images are created in parallel, after completion the Debian images are created.
 
@@ -147,7 +150,13 @@ All Fedora images are created in parallel, after completion the Debian images ar
 make fedora debian
 ```
 
-#### Build and push images for `Fedora` and `Debian` in parallel
+To publish the images after building them:
+
+```bash
+make fedora debian PUBLISH=true
+```
+
+#### Build images for `Fedora` and `Debian` in parallel
 
 This will make `make` run 2 jobs simultaneously, but mind the resource consumption:
 
@@ -158,8 +167,8 @@ make -j 2 fedora debian
 This basically translates to the two commands:
 
 ```bash
-ansible-playbook playbooks/build.yml --limit=fedora &
-ansible-playbook playbooks/build.yml --limit=debian &
+.venv/bin/ansible-playbook playbooks/build.yml --limit=fedora --extra-vars=publish_images=false &
+.venv/bin/ansible-playbook playbooks/build.yml --limit=debian --extra-vars=publish_images=false &
 ```
 
 The inventory `containers.yml` is configured as static yaml inventory in `ansible.cfg` and therefore implicitly used by `ansible-playbook`.

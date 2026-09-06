@@ -11,4 +11,5 @@ roles/
 .vscode/
 # Python files and directories -------------------------------------------------
 .venv/
+uv.lock
 __pycache__/

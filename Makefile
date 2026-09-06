@@ -10,13 +10,17 @@ SHELL		:= /bin/bash
 
 .DEFAULT_GOAL	:= help
 
-# --- Python virtual environment -----------------------------------------------
-REQ_TXT			:= requirements.txt
+# --- Python environment -------------------------------------------------------
+PYPROJECT		:= pyproject.toml
 REQ_YML			:= requirements.yml
+UV			:= uv
 VENV			:= .venv
-PIP			:= $(VENV)/bin/pip
+PYTHON			:= $(VENV)/bin/python
+COMMITIZEN		:= $(VENV)/bin/cz
 PRE_COMMIT		:= $(VENV)/bin/pre-commit
 PSR			:= $(VENV)/bin/semantic-release
+PRE_COMMIT_CONFIG	:= .pre-commit-config.yaml
+COMMIT_MSG_HOOK		:= .git/hooks/commit-msg
 
 # --- Ansible ------------------------------------------------------------------
 ANSIBLE			:= .ansible
@@ -25,6 +29,7 @@ ANSIBLE_COLLECTIONS	:= $(CURDIR)/$(ANSIBLE)/collections
 GALAXY			:= $(VENV)/bin/ansible-galaxy
 GALAXY_COLL_INSTALL	:= $(GALAXY) collection install --collections-path $(ANSIBLE_COLLECTIONS)
 PLAYBOOK		:= $(VENV)/bin/ansible-playbook
+PODMAN_COLLECTION_MANIFEST	:= $(ANSIBLE_COLLECTIONS)/ansible_collections/containers/podman/MANIFEST.json
 export ANSIBLE_CONFIG	:= $(ANSIBLE_CFG)
 
 # --- Makefile -----------------------------------------------------------------
@@ -37,7 +42,7 @@ PUBLISH			?= false
 GROUP			?=
 dockerhub_filter	= $(if $(strip $(GROUP)),--extra-vars=dockerhub_filter=$(GROUP))
 
-# --- Help and Python virtual environment targets -----------------------------
+# --- Help and Python environment targets -------------------------------------
 
 # default target
 .PHONY: help
@@ -45,17 +50,17 @@ help:
 	@echo "Usage: make <target> [FEATURE=<branch-name>] [GROUP=<group>] [PUBLISH=true]"
 	@echo
 	@echo "Environment:"
-	@echo "  FEATURE=<branch-name>    Feature branch name for start-feature / merge-feature-to-dev"
-	@echo "  GROUP=<group>            Limit Docker Hub metadata or cleanup to one inventory group"
-	@echo "  PUBLISH=true             Publish built images; default is build-only"
+	@echo "  FEATURE=<branch-name> Feature branch name for start-feature / merge-feature-to-dev"
+	@echo "  GROUP=<group>         Limit Docker Hub metadata or cleanup to one inventory group"
+	@echo "  PUBLISH=true          Publish built images; default is build-only"
 	@echo
 	@echo "Targets:"
 	@echo "  help                  Show this help"
-	@echo "  install               Create python virtual environment and install all dependencies,"
+	@echo "  install               Create the uv-managed Python environment and install all dependencies,"
 	@echo "                        must run once after fresh clone or after dist-clean/mrproper"
-	@echo "  upgrade               Upgrade python and ansible dependencies in the virtual environment"
-	@echo "  clean                 Remove ansible environment and virtual environment"
-	@echo "  dist-clean            Remove the virtual environment and build artifacts"
+	@echo "  upgrade               Upgrade Python and Ansible dependencies in the local environment"
+	@echo "  clean                 Remove Ansible and Python environments"
+	@echo "  dist-clean            Remove local environments and build artifacts"
 	@echo "  mrproper              Alias for dist-clean"
 	@echo
 	@echo "Build:"
@@ -80,30 +85,41 @@ help:
 	@echo "Supported groups:"
 	@echo "  $(groups)"
 
-$(PIP):
-	@python3 -m venv $(VENV)
+$(PYTHON):
+	@$(UV) venv $(VENV)
 
-# grouped target for python dependencies ~= one recipe builds multiple targets
-$(PLAYBOOK) $(GALAXY) $(PRE_COMMIT) $(PSR) &: $(REQ_TXT) | $(PIP)
-	@$(PIP) install --upgrade pip
-	@$(PIP) install -r $(REQ_TXT)
+# grouped target for Python dependencies: one recipe builds multiple targets
+$(PLAYBOOK) $(GALAXY) $(COMMITIZEN) $(PRE_COMMIT) $(PSR) &: $(PYPROJECT) | $(PYTHON)
+	@$(UV) pip install --python $(PYTHON) -r $(PYPROJECT)
+
+$(COMMIT_MSG_HOOK): $(PRE_COMMIT_CONFIG) | $(PRE_COMMIT)
+	@$(PRE_COMMIT) install --hook-type commit-msg
+
+$(PODMAN_COLLECTION_MANIFEST): $(REQ_YML) | $(GALAXY)
+	@$(GALAXY_COLL_INSTALL) -r $(REQ_YML)
 
 .PHONY: ansible-deps
-ansible-deps: $(REQ_YML) | $(GALAXY)
-	@$(GALAXY_COLL_INSTALL) -r $(REQ_YML)
+ansible-deps: $(PODMAN_COLLECTION_MANIFEST)
 
 # --- General make targets ----------------------------------------------------
 
 .PHONY: install
-install: ansible-deps | $(PRE_COMMIT)
+install: ansible-deps $(COMMIT_MSG_HOOK)
+
+.PHONY: upgrade-python-deps
+upgrade-python-deps: $(PYPROJECT) | $(PYTHON)
+	@$(UV) pip install --python $(PYTHON) --upgrade -r $(PYPROJECT)
+
+.PHONY: upgrade-ansible-deps
+upgrade-ansible-deps: upgrade-python-deps $(REQ_YML)
+	@$(GALAXY_COLL_INSTALL) --force -r $(REQ_YML)
+
+.PHONY: upgrade-pre-commit-hook
+upgrade-pre-commit-hook: upgrade-python-deps $(PRE_COMMIT_CONFIG)
 	@$(PRE_COMMIT) install --hook-type commit-msg
 
 .PHONY: upgrade
-upgrade: $(REQ_TXT) $(REQ_YML) | $(PIP)
-	@$(PIP) install --upgrade pip
-	@$(PIP) install --upgrade -r $(REQ_TXT)
-	@$(GALAXY_COLL_INSTALL) --force -r $(REQ_YML)
-	@$(PRE_COMMIT) install --hook-type commit-msg
+upgrade: upgrade-ansible-deps upgrade-pre-commit-hook
 
 .PHONY: prune
 prune:
