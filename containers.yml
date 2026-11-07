@@ -44,9 +44,6 @@ all:
         alpine-3.22:
           push_tags:
             - "3.22"
-        alpine-3.21:
-          push_tags:
-            - "3.21"
       vars:
         display_name: "Alpine"
         pull_image: "alpine"
@@ -54,9 +51,8 @@ all:
         push_repo: "molecule-alpine"
     amazonlinux:
       hosts:
-        amazonlinux-2023:
+        amazonlinux-latest:
           push_tags:
-            - "2023"
             - "latest"
       vars:
         display_name: "Amazon Linux"
@@ -100,16 +96,16 @@ all:
         push_repo: "molecule-debian"
     fedora:
       hosts:
+        fedora-45:
+          push_tags:
+            - "45"
+            - "latest"
         fedora-44:
           push_tags:
             - "44"
-            - "latest"
-        fedora-43:
-          push_tags:
-            - "43"
         fedora-rawhide:
           push_tags:
-            - "45"
+            - "46"
             - "rawhide"
       vars:
         display_name: "Fedora"
@@ -120,13 +116,9 @@ all:
       hosts:
         opensuse-leap-16:
           push_tags:
-            - "16.0"
+            - "16.1"
             - "16"
             - "latest"
-        opensuse-leap-15:
-          push_tags:
-            - "15.6"
-            - "15"
         opensuse-tumbleweed:
           display_name: "OpenSUSE Tumbleweed"
           pull_image: "opensuse/tumbleweed"
