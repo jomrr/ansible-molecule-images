@@ -73,6 +73,7 @@
             --layers
             --source-date-epoch={{ lookup('pipe', 'git log -1 --pretty=%ct') }}
             --rewrite-timestamp
+            --pull=always
         force: true
 
     - name: "Tag image for target registries"
