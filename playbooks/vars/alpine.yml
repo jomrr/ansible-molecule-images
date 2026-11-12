@@ -14,6 +14,7 @@ dockerfile:
     - openrc
     - procps
     - python3
+    - shadow
     - sudo
   package_clean: "apk cache clean"
   commands:
@@ -24,7 +25,7 @@ dockerfile:
     - sed -i -e 's/#rc_sys=""/rc_sys="lxc"/g' -e 's/^#\(rc_logger="YES"\)$/\1/' /etc/rc.conf
     - sed -i '/tty/d' /etc/inittab
     - sed -i 's/hostname $opts/# hostname $opts/g' /etc/init.d/hostname
-    - sed -i 's/mount -t tmpfs/# mount -t tmpfs/g' /lib/rc/sh/init.sh
+    - sed -i 's/mount -t tmpfs/# mount -t tmpfs/g' /usr/libexec/rc/sh/init.sh
     - 'getent group 1000 >/dev/null || groupadd -g 1000 ansible'
     - 'getent passwd 1000 >/dev/null || useradd -u 1000 -g 1000 -m -s /bin/bash ansible'
     - 'passwd -l ansible || true'

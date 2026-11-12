@@ -24,6 +24,8 @@ dockerfile:
     - systemd-pam
   package_clean: "dnf -qy autoremove && dnf -qy clean all"
   commands:
+    # upstream base image ships shadow-utils without file capabilities
+    - rpm --setcaps shadow-utils
     - find /etc/systemd/system /lib/systemd/system -path 'sysinit.target.wants/*' -not -name '*systemd-tmpfiles*' -delete
     - rm -f /lib/systemd/system/multi-user.target.wants/*
     - rm -f /etc/systemd/system/*.wants/*

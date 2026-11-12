@@ -15,13 +15,9 @@ ENV {{ env_var }}={{ value }}
 # Install dependencies and run commands
 RUN {{ dockerfile.package_update }} && \
     {{ dockerfile.package_install }} {{ dockerfile.packages | join(' ') }} && \
-    {{ dockerfile.package_clean }}; \
+    {{ dockerfile.package_clean }} && \
 {% for command in dockerfile.commands %}
-{% if loop.last %}
-    {{ command }}
-{% else %}
-    {{ command }}; \
-{% endif %}
+    { {{ command }}; }{{ ' && \\' if not loop.last else '' }}
 {% endfor %}
 
 # Set entrypoint
