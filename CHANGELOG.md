@@ -2,6 +2,55 @@
 
 <!-- version list -->
 
+## v3.0.0 (2026-11-12)
+
+### Bug Fixes
+
+- Improve Docker Hub metadata update and description handling
+  ([`a3499de`](https://github.com/jomrr/ansible-molecule-images/commit/a3499de011d4930e4a27a5c14144a42c9639c3bd))
+
+- Missing fedora base image caps for shadow-utils and fail-fast
+  ([`c664150`](https://github.com/jomrr/ansible-molecule-images/commit/c664150e095ae0836b0c4a28796c31431a61d7b8))
+
+- Use pull=always as fedora 45 image used rawhide from cache
+  ([`1f3e78f`](https://github.com/jomrr/ansible-molecule-images/commit/1f3e78f2578e8c439bd5187fd3a6f9864d241292))
+
+- **docker**: Hide sensitive output in Docker Hub repository tasks
+  ([`b5fbe1f`](https://github.com/jomrr/ansible-molecule-images/commit/b5fbe1f32dd9e43cd86b4c3979f6f9e657eb2013))
+
+### Build System
+
+- Add group and publish controls for builds and Docker tasks
+  ([`f82833f`](https://github.com/jomrr/ansible-molecule-images/commit/f82833f45cdd8b73234f20228314d53af1787664))
+
+- Adopt uv and pyproject.toml for unified Python environment management
+  ([`42abfdf`](https://github.com/jomrr/ansible-molecule-images/commit/42abfdfcf2740f84d6a017893dad9938c4f4d425))
+
+- **package**: Switch to systemd-libs and configure dbus services
+  ([`22c02fd`](https://github.com/jomrr/ansible-molecule-images/commit/22c02fd2b4a708383c6a6054903b16c5b23eb21b))
+
+- **packages**: Align service setup and package lists on AlmaLinux and Fedora
+  ([`a9fca57`](https://github.com/jomrr/ansible-molecule-images/commit/a9fca57f1456b8250c5e13ca9e7090a2271f3321))
+
+### Chores
+
+- Update alpine, fedora and opensuse
+  ([`84d4191`](https://github.com/jomrr/ansible-molecule-images/commit/84d4191f65be457948cf636886f2beea765ec291))
+
+### Features
+
+- Add cleanup workflow
+  ([`034f6a3`](https://github.com/jomrr/ansible-molecule-images/commit/034f6a3b339548c829098cc24a0677883aa86576))
+
+- Manage and sync Docker Hub repository metadata declaratively
+  ([`803cf40`](https://github.com/jomrr/ansible-molecule-images/commit/803cf40a64b64a6c517d4cd6572b30a9bd72bf49))
+
+### Refactoring
+
+- **dockerhub**: Refactor and validate Docker Hub group selection logic
+  ([`8a8d4eb`](https://github.com/jomrr/ansible-molecule-images/commit/8a8d4ebcc4b7eb346884820ada674fcd8ac754e0))
+
+
 ## v2.3.0 (2026-06-09)
 
 ### Build System
