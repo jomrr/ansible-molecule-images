@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v3.0.1 (2026-11-22)
+
+### Bug Fixes
+
+- Use downloadcontent.opensuse.org for tumbleweed repos
+  ([`a109679`](https://github.com/jomrr/ansible-molecule-images/commit/a109679d1252c2bb0921b18812cb85658286823c))
+
+
 ## v3.0.0 (2026-11-12)
 
 ### Bug Fixes
