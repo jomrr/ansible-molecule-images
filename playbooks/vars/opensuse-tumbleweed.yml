@@ -7,7 +7,9 @@ dockerfile:
   entrypoint: "/usr/lib/systemd/systemd"
   environment:
     container: docker
-  package_update: "zypper -n update"
+  # download.opensuse.org redirects repodata/packages to mirrors that may lag
+  # behind the current snapshot; downloadcontent serves everything from origin
+  package_update: "sed -i -E 's#^baseurl=https?://download[.]opensuse[.]org/#baseurl=https://downloadcontent.opensuse.org/#' /etc/zypp/repos.d/*.repo && zypper -n update"
   package_install: "zypper -n install"
   packages:
     - bash
